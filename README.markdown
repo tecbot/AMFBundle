@@ -27,9 +27,9 @@ AMF for Symfony2 (not yet stable)
 
 ## Use
 
-Add all your AMF services into BundleName\AMF\ and extends Bundle\Tecbot\AMFBundle\Service\Service
-add the Service suffix to a class e.g. UserService
-add the Action suffix to a methode e.g. authenticateAction()
+- add all your AMF services into BundleName\AMF\ and extends Bundle\Tecbot\AMFBundle\Service\Service
+- add the Service suffix to a class e.g. UserService
+- add the Action suffix to a methode e.g. authenticateAction()
     
     <?php
     
