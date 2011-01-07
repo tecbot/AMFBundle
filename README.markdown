@@ -27,22 +27,11 @@ AMF for Symfony2 (not yet stable)
 
 ## Use
 
-- add all your AMF services into BundleName\AMF\ and extends Bundle\Tecbot\AMFBundle\Service\Service
-- add the Service suffix to a class e.g. UserService
-- add the Action suffix to a methode e.g. authenticateAction()
-    
-    <?php
-    
-    namespace Application\BundleName\AMF;
+add all your AMF services into BundleName\AMF\ and 
 
-    use Bundle\Tecbot\AMFBundle\Service\Service;
-    
+    # add the Service suffix to a class e.g. UserService and extends Bundle\Tecbot\AMFBundle\Service\Service
     class UserService extends Service
-    {
-        public function authenticateAction()
-        {
-            ///... stuff
 
-            return mixed;
-        }
-    }
+    # add the Action suffix to a methode e.g. authenticateAction()
+    public function authenticateAction()
+    
