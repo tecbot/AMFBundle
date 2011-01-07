@@ -1,0 +1,46 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://www.symfony-project.org/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="amf.server.class">Bundle\Tecbot\AMFBundle\Server</parameter>
+        <parameter key="amf.request_listener.class">Bundle\Tecbot\AMFBundle\Listener\RequestListener</parameter>
+        <parameter key="amf.service_resolver.class">Bundle\Tecbot\AMFBundle\Service\Resolver\ServiceResolver</parameter>
+        <parameter key="amf.service_name_converter.class">Bundle\Tecbot\AMFBundle\Service\Resolver\ServiceNameConverter</parameter>
+        <parameter key="amf.services" type="collection"></parameter>
+        <parameter key="amf.class_map" type="collection"></parameter>
+    </parameters>
+
+    <services>
+
+        <service id="amf.service_name_converter" class="%amf.service_name_converter.class%" public="false">
+            <argument type="service" id="kernel" />
+            <argument type="service" id="logger" on-invalid="ignore" />
+        </service>
+
+        <service id="amf.service_resolver" class="%amf.service_resolver.class%" public="false">
+            <argument type="service" id="service_container" />
+            <argument type="service" id="amf.service_name_converter" />
+            <argument type="service" id="logger" on-invalid="ignore" />
+        </service>
+        
+        <service id="amf.server" class="%amf.server.class%">
+            <argument type="service" id="amf.service_resolver" />
+            <argument type="collection">
+                <argument key="debug">%kernel.debug%</argument>
+            </argument>
+            <argument>%amf.services%</argument>
+            <argument>%amf.class_map%</argument>
+        </service>
+        
+        <service id="amf.request_listener" class="%amf.request_listener.class%" public="false">
+            <tag name="kernel.listener" />
+            <argument type="service" id="amf.server" />
+            <argument type="service" id="logger" on-invalid="ignore" />
+        </service>
+        
+    </services>
+
+</container>
