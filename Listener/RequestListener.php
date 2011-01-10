@@ -46,7 +46,7 @@ class RequestListener
         }
         
         $master = HttpKernelInterface::MASTER_REQUEST === $event->get('request_type');
-        if(false === $master && 'application/x-amf' == $contentType) {
+        if(false === $master) {
             $event->setReturnValue($this->lastResponse);
             
             return true;
@@ -63,13 +63,6 @@ class RequestListener
         
         $event->setReturnValue($this->lastResponse);
         
-        // disconnect all listeners
-        $this->dispatcher->disconnect('core.request');
-        $this->dispatcher->disconnect('core.response');
-        
-        // register amf request listener
-        $this->register($this->dispatcher);
-
         return true;
     }
 }
