@@ -27,6 +27,7 @@
         </service>
         
         <service id="amf.server" class="%amf.server.class%">
+            <argument type="service" id="event_dispatcher" />
             <argument type="service" id="amf.service_resolver" />
             <argument type="collection">
                 <argument key="debug">%kernel.debug%</argument>

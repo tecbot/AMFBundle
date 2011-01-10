@@ -3,8 +3,11 @@
 namespace Bundle\Tecbot\AMFBundle;
 
 use Bundle\Tecbot\AMFBundle\Service\Resolver\ServiceResolverInterface;
+use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Zend\Amf\Constants;
+use Zend\Amf\Parser;
 use Zend\Amf\Request\HttpRequest;
 use Zend\Amf\Request\StreamRequest;
 use Zend\Amf\Response\HttpResponse;
@@ -13,6 +16,7 @@ use Zend\Amf\Value;
 
 class Server
 {
+    protected $dispatcher;
     protected $resolver;
     protected $request;
     protected $response;
@@ -22,13 +26,15 @@ class Server
     /**
      * Constructor.
      * 
+     * @param EventDispatcher $dispatcher
      * @param ServiceResolverInterface $resolver
      * @param array $options
      * @param array $services
      * @param array $classMap 
      */
-    public function __construct(ServiceResolverInterface $resolver, array $options = array(), array $services = array(), array $classMap = array())
+    public function __construct(EventDispatcher $dispatcher, ServiceResolverInterface $resolver, array $options = array(), array $services = array(), array $classMap = array())
     {
+        $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
 
         $this->options = array(
@@ -45,7 +51,7 @@ class Server
         foreach ($services as $id => $serviceClass) {
             $this->addService($id, $serviceClass);
         }
-
+        
         foreach ($classMap as $asClass => $phpClass) {
             $this->addClassMap($asClass, $phpClass);
         }
@@ -226,7 +232,7 @@ class Server
                         $method = substr(strrchr($targetURI, '.'), 1);
                         $return = $this->dispatch($method, $body->getData(), $source);
                     } else {
-                        throw new NotFoundHttpException('Unable to find the AMF service.');
+                        throw new NotFoundHttpException(sprintf('Unable to find the AMF service (AMF0). targetURI: %s, Source: %s', $targetURI, $source));
                     }
                 } else {
                     // AMF3 read message type
@@ -249,7 +255,7 @@ class Server
                             $method = substr(strrchr($targetURI, '.'), 1);
                             $return = $this->dispatch($method, $body->getData(), $source);
                         } else {
-                            throw new NotFoundHttpException('Unable to find the AMF service.');
+                            throw new NotFoundHttpException(sprintf('Unable to find the AMF service (NetConnection). targetURI: %s, Source: %s', $targetURI, $source));
                         }
                     }
                 }
@@ -282,8 +288,12 @@ class Server
     {
         // load service
         if (false === isset($this->services[$source]) || false === $service = $this->resolver->getService($this->services[$source], $method)) {
-            throw new NotFoundHttpException('Unable to find the AMF service.');
+            throw new NotFoundHttpException(sprintf('Unable to find the AMF service. method: %s, params: %s, source: %s', $method, var_export($params, true), $source));
         }
+
+        $event = new Event($this, 'amf.service', array('params' => $params, 'method' => $method));
+        $this->dispatcher->filter($event, $service);
+        $service = $event->getReturnValue();
 
         // service must be a callable
         if (!is_callable($service)) {
