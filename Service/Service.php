@@ -1,6 +1,6 @@
 <?php
 
-namespace Bundle\Tecbot\AMFBundle\Service;
+namespace Tecbot\AMFBundle\Service;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
 

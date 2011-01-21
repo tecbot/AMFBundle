@@ -1,6 +1,6 @@
 <?php
 
-namespace Bundle\Tecbot\AMFBundle\Service\Resolver;
+namespace Tecbot\AMFBundle\Service;
 
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -10,19 +10,19 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
 class ServiceResolver implements ServiceResolverInterface
 {
     protected $container;
-    protected $converter;
+    protected $parser;
 
     /**
      * Constructor.
      *
      * @param ContainerInterface      $container A ContainerInterface instance
-     * @param ServiceNameConverter    $converter A ServiceNameConverter instance
+     * @param ServiceNameParser       $parser A ServiceNameparser instance
      * @param LoggerInterface         $logger    A LoggerInterface instance
      */
-    public function __construct(ContainerInterface $container, ServiceNameConverter $converter, LoggerInterface $logger = null)
+    public function __construct(ContainerInterface $container, ServiceNameParser $parser, LoggerInterface $logger = null)
     {
         $this->container = $container;
-        $this->converter = $converter;
+        $this->parser = $parser;
         $this->logger = $logger;
     }
 
@@ -73,7 +73,7 @@ class ServiceResolver implements ServiceResolverInterface
         $count = substr_count($service, ':');
         if (1 == $count) {
             // AMF service in the a:b notation then
-            $service = $this->converter->fromShortNotation($service);
+            $service = $this->parser->parse($service);
         } else if (0 == $count) {
             // AMF service in the service notation
             return $this->container->get($service);

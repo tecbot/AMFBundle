@@ -1,8 +1,8 @@
 <?php
 
-namespace Bundle\Tecbot\AMFBundle;
+namespace Tecbot\AMFBundle;
 
-use Bundle\Tecbot\AMFBundle\Service\Resolver\ServiceResolverInterface;
+use Tecbot\AMFBundle\Service\ServiceResolverInterface;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

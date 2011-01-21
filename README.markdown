@@ -2,38 +2,46 @@ AMF for Symfony2 (not yet stable)
 
 ## Installation
 
-### Add Tecbot\AMFBundle to your src/Bundle dir
+  1. Add Tecbot\AMFBundle to your src/ dir
 
-    git submodule add git://github.com/tecbot/AMFBundle.git src/Bundle/Tecbot/AMFBundle
+          git submodule add git://github.com/tecbot/AMFBundle.git src/Tecbot/AMFBundle
     
-### Add TecbotAMFBundle to your application Kernel
+  2. Add the Tecbot namespace to your autoloader
 
-    // app/AppKernel.php
-    public function registerBundles()
-    {
-        return array(
-            //..
-            new Bundle\Tecbot\AMFBundle\TecbotAMFBundle(),
-            //..
-        );
-    }
-    
-### Update your config
+          // src/autoload.php
+          $loader->registerNamespaces(array(
+              'Tecbot' => __DIR__,
+              // your other namespaces
+          ));
 
-    # app/config/config.yml
-    amf.config:
-        services: # Services
-            UserService: UserBundle:User # Map UserService id from AMF to UserBundle:UserService class
-        class_map: # class mapping. Actionscript (UserVO) to PHP (Application\UserBundle\AMF\VO\UserVO)
-            UserVO: Application\UserBundle\AMF\VO\UserVO
+  3. Add this bundle to your application's kernel:
+
+          // app/AppKernel.php
+          public function registerBundles()
+          {
+              return array(
+                  // ...
+                  new Tecbot\AMFBundle\TecbotAMFBundle(),
+                  // ...
+              );
+          }
+
+  4. Update your config
+
+          # app/config/config.yml
+          amf.config:
+              services: # Services
+                  UserService: UserBundle:User # Map UserService id from AMF to UserBundle:UserService class
+              class_map: # class mapping. Actionscript (UserVO) to PHP (Application\UserBundle\AMF\VO\UserVO)
+                  UserVO: Application\UserBundle\AMF\VO\UserVO
 
 ## Use
 
 ### PHP
 
-add all your AMF services into BundleName\AMF\ and 
+add all your AMF services into YourBundle\AMF\ and
 
-    # add the Service suffix to a class e.g. UserService and extends Bundle\Tecbot\AMFBundle\Service\Service
+    # add the Service suffix to a class e.g. UserService and extends Tecbot\AMFBundle\Service\Service
     class UserService extends Service
 
     # add the Action suffix to a methode e.g. authenticateAction()

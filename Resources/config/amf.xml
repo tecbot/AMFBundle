@@ -5,24 +5,24 @@
     xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="amf.server.class">Bundle\Tecbot\AMFBundle\Server</parameter>
-        <parameter key="amf.request_listener.class">Bundle\Tecbot\AMFBundle\Listener\RequestListener</parameter>
-        <parameter key="amf.service_resolver.class">Bundle\Tecbot\AMFBundle\Service\Resolver\ServiceResolver</parameter>
-        <parameter key="amf.service_name_converter.class">Bundle\Tecbot\AMFBundle\Service\Resolver\ServiceNameConverter</parameter>
+        <parameter key="amf.server.class">Tecbot\AMFBundle\Server</parameter>
+        <parameter key="amf.request_listener.class">Tecbot\AMFBundle\Listener\RequestListener</parameter>
+        <parameter key="amf.service_resolver.class">Tecbot\AMFBundle\Service\ServiceResolver</parameter>
+        <parameter key="amf.service_name_parser.class">Tecbot\AMFBundle\Service\ServiceNameParser</parameter>
         <parameter key="amf.services" type="collection"></parameter>
         <parameter key="amf.class_map" type="collection"></parameter>
     </parameters>
 
     <services>
 
-        <service id="amf.service_name_converter" class="%amf.service_name_converter.class%" public="false">
+        <service id="amf.service_name_parser" class="%amf.service_name_parser.class%" public="false">
             <argument type="service" id="kernel" />
             <argument type="service" id="logger" on-invalid="ignore" />
         </service>
 
         <service id="amf.service_resolver" class="%amf.service_resolver.class%" public="false">
             <argument type="service" id="service_container" />
-            <argument type="service" id="amf.service_name_converter" />
+            <argument type="service" id="amf.service_name_parser" />
             <argument type="service" id="logger" on-invalid="ignore" />
         </service>
         

@@ -1,6 +1,6 @@
 <?php
 
-namespace Bundle\Tecbot\AMFBundle\DependencyInjection;
+namespace Tecbot\AMFBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -8,14 +8,13 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class AMFExtension extends Extension
 {
-
     /**
      * Loads the AMF configuration.
      *
      * Usage example:
      *     amf.config:
      *          services:
-     *              UserService: UserBundle:User 
+     *              UserService: UserBundle:User
      *
      * @param array $config An array of configuration settings
      * @param ContainerBuilder $container A ContainerBuilder instance

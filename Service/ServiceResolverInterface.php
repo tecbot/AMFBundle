@@ -1,6 +1,6 @@
 <?php
 
-namespace Bundle\Tecbot\AMFBundle\Service\Resolver;
+namespace Tecbot\AMFBundle\Service;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -13,7 +13,7 @@ interface ServiceResolverInterface
      * return false when it is not able to determine the AMF service.
      *
      * The resolver must only throw an exception when it should be able to load
-     *  AMF service but cannot because of some errors made by the developer.
+     * AMF service but cannot because of some errors made by the developer.
      *
      * @param string $service A AMF Service
      * @param string $methode A AMF Service methode

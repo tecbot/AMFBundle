@@ -1,9 +1,8 @@
 <?php
 
-namespace Bundle\Tecbot\AMFBundle\Listener;
+namespace Tecbot\AMFBundle\Listener;
 
-use Bundle\Tecbot\AMFBundle\Server;
-use Bundle\Tecbot\AMFBundle\Service\Resolver\ServiceResolverInterface;
+use Tecbot\AMFBundle\Server;
 use Symfony\Bundle\FrameworkBundle\EventDispatcher;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\Event;
