@@ -36,8 +36,8 @@
             <argument>%amf.class_map%</argument>
         </service>
         
-        <service id="amf.request_listener" class="%amf.request_listener.class%" public="false">
-            <tag name="kernel.listener" />
+        <service id="amf.request_listener" class="%amf.request_listener.class%">
+            <tag name="kernel.listener" event="core.request" method="handle" priority="128" />
             <argument type="service" id="amf.server" />
             <argument type="service" id="logger" on-invalid="ignore" />
         </service>

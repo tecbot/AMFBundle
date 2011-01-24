@@ -8,6 +8,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class AMFExtension extends Extension
 {
+    protected $resources = array(
+        'amf' => 'amf.xml',
+    );
+
     /**
      * Loads the AMF configuration.
      *
@@ -16,33 +20,22 @@ class AMFExtension extends Extension
      *          services:
      *              UserService: UserBundle:User
      *
-     * @param array $config An array of configuration settings
+     * @param array $configs An array of configuration settings
      * @param ContainerBuilder $container A ContainerBuilder instance
      */
-    public function configLoad($config, ContainerBuilder $container)
+    public function configLoad($configs, ContainerBuilder $container)
     {
-        $this->loadDefaults($config, $container);
-    }
-
-    /**
-     * Loads the default configuration.
-     *
-     * @param array $config An array of configuration settings
-     * @param ContainerBuilder $container A ContainerBuilder instance
-     */
-    protected function loadDefaults(array $config, ContainerBuilder $container)
-    {
-        if (!$container->hasDefinition('amf')) {
-            $loader = new XmlFileLoader($container, __DIR__ . '/../Resources/config');
-            $loader->load('amf.xml');
+        $config = array_shift($configs);
+        foreach ($configs as $tmp) {
+            $config = array_replace_recursive($config, $tmp);
         }
-        
-        
+
+        $this->loadDefaults($container);
 
         if (isset($config['services']) && is_array($config['services'])) {
             $container->setParameter('amf.services', $config['services']);
         }
-        
+
         if (isset($config['class_map']) && is_array($config['class_map'])) {
             $container->setParameter('amf.class_map', $config['class_map']);
         }
@@ -66,5 +59,18 @@ class AMFExtension extends Extension
     public function getAlias()
     {
         return 'amf';
+    }
+
+    /**
+     * Loads the default configuration.
+     *
+     * @param ContainerBuilder $container A ContainerBuilder instance
+     */
+    protected function loadDefaults(ContainerBuilder $container)
+    {
+        $loader = new XmlFileLoader($container, __DIR__ . '/../Resources/config');
+        foreach ($this->resources as $resource) {
+            $loader->load($resource);
+        }
     }
 }
