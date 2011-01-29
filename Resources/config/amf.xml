@@ -29,6 +29,7 @@
         <service id="amf.kernel" class="%amf.kernel.class%">
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="amf.service_resolver" />
+            <argument>%kernel.debug%</argument>
             <argument>%amf.services%</argument>
             <argument>%amf.mapping%</argument>
         </service>

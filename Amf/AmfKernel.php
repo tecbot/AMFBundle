@@ -26,6 +26,7 @@ class AmfKernel implements AmfKernelInterface
 {
     protected $dispatcher;
     protected $resolver;
+    protected $debug;
     protected $services;
 
     /**
@@ -36,10 +37,11 @@ class AmfKernel implements AmfKernelInterface
      * @param array                       $services   An array of services
      * @param array                       $mapping    An array of class mapping
      */
-    public function __construct(EventDispatcherInterface $dispatcher, ServiceResolverInterface $resolver, array $services = array(), array $mapping = array())
+    public function __construct(EventDispatcherInterface $dispatcher, ServiceResolverInterface $resolver, $debug = false, array $services = array(), array $mapping = array())
     {
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
+        $this->debug = $debug;
 
         foreach ($services as $id => $serviceClass) {
             $this->services[$id] = $serviceClass;
@@ -231,7 +233,7 @@ class AmfKernel implements AmfKernelInterface
                 $return = array(
                     'code' => $code,
                 );
-                if (false !== $this->options['debug']) {
+                if (false !== $this->debug) {
                     $return['description'] = $description;
                     $return['detail'] = $detail;
                     $return['line'] = $line;
@@ -241,7 +243,7 @@ class AmfKernel implements AmfKernelInterface
             case Constants::AMF3_OBJECT_ENCODING :
                 $return = new ErrorMessage($message);
                 $return->faultCode = $code;
-                if (false !== $this->options['debug']) {
+                if (false !== $this->debug) {
                     $return->faultString = $description;
                     $return->faultDetail = $detail;
                 }
