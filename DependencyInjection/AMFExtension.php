@@ -31,14 +31,9 @@ class AMFExtension extends Extension
         }
 
         $this->loadDefaults($container);
-
-        if (isset($config['services']) && is_array($config['services'])) {
-            $container->setParameter('amf.services', $config['services']);
-        }
-
-        if (isset($config['class_map']) && is_array($config['class_map'])) {
-            $container->setParameter('amf.class_map', $config['class_map']);
-        }
+        
+        $container->setParameter('amf.services', Extension::normalizeConfig($config, 'service'));
+        $container->setParameter('amf.mapping', Extension::normalizeConfig($config, 'mapping', 'mapping'));
     }
 
     /**

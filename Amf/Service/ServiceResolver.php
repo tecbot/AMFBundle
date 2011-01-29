@@ -1,6 +1,6 @@
 <?php
 
-namespace Tecbot\AMFBundle\Service;
+namespace Tecbot\AMFBundle\Amf\Service;
 
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -15,9 +15,9 @@ class ServiceResolver implements ServiceResolverInterface
     /**
      * Constructor.
      *
-     * @param ContainerInterface      $container A ContainerInterface instance
-     * @param ServiceNameParser       $parser A ServiceNameparser instance
-     * @param LoggerInterface         $logger    A LoggerInterface instance
+     * @param ContainerInterface $container A ContainerInterface instance
+     * @param ServiceNameParser  $parser    A ServiceNameparser instance
+     * @param LoggerInterface    $logger    A LoggerInterface instance
      */
     public function __construct(ContainerInterface $container, ServiceNameParser $parser, LoggerInterface $logger = null)
     {
@@ -64,9 +64,9 @@ class ServiceResolver implements ServiceResolverInterface
     /**
      * Returns a callable for the given amf service.
      *
-     * @param string $service A AMF Service string
+     * @param  string $service A AMF Service string
      *
-     * @return mixed A PHP callable
+     * @return mixed  A PHP callable
      */
     protected function createService($service)
     {

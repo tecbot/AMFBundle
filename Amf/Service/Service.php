@@ -1,6 +1,6 @@
 <?php
 
-namespace Tecbot\AMFBundle\Service;
+namespace Tecbot\AMFBundle\Amf\Service;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
 
@@ -23,7 +23,7 @@ class Service extends ContainerAware
      *
      * @param  string $id The service id
      *
-     * @return object  The service
+     * @return object The service
      */
     public function get($id)
     {

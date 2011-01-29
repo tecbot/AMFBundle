@@ -1,6 +1,6 @@
 <?php
 
-namespace Tecbot\AMFBundle\Service;
+namespace Tecbot\AMFBundle\Amf\Service;
 
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;

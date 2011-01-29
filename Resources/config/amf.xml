@@ -5,12 +5,12 @@
     xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="amf.server.class">Tecbot\AMFBundle\Server</parameter>
-        <parameter key="amf.request_listener.class">Tecbot\AMFBundle\Listener\RequestListener</parameter>
-        <parameter key="amf.service_resolver.class">Tecbot\AMFBundle\Service\ServiceResolver</parameter>
-        <parameter key="amf.service_name_parser.class">Tecbot\AMFBundle\Service\ServiceNameParser</parameter>
+        <parameter key="amf.kernel.class">Tecbot\AMFBundle\Amf\AmfKernel</parameter>
+        <parameter key="amf.service_resolver.class">Tecbot\AMFBundle\Amf\Service\ServiceResolver</parameter>
+        <parameter key="amf.service_name_parser.class">Tecbot\AMFBundle\Amf\Service\ServiceNameParser</parameter>
+        
         <parameter key="amf.services" type="collection"></parameter>
-        <parameter key="amf.class_map" type="collection"></parameter>
+        <parameter key="amf.mapping" type="collection"></parameter>
     </parameters>
 
     <services>
@@ -26,20 +26,11 @@
             <argument type="service" id="logger" on-invalid="ignore" />
         </service>
         
-        <service id="amf.server" class="%amf.server.class%">
+        <service id="amf_kernel" class="%amf.kernel.class%">
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="amf.service_resolver" />
-            <argument type="collection">
-                <argument key="debug">%kernel.debug%</argument>
-            </argument>
             <argument>%amf.services%</argument>
-            <argument>%amf.class_map%</argument>
-        </service>
-        
-        <service id="amf.request_listener" class="%amf.request_listener.class%">
-            <tag name="kernel.listener" event="core.request" method="handle" priority="128" />
-            <argument type="service" id="amf.server" />
-            <argument type="service" id="logger" on-invalid="ignore" />
+            <argument>%amf.mapping%</argument>
         </service>
         
     </services>
