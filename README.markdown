@@ -14,7 +14,15 @@ AMF for Symfony2 (not yet stable)
               // your other namespaces
           ));
 
-  3. Add this bundle to your application's kernel:
+  3. Extends your Kernel from Tecbot\AMFBundle\Amf\Kernel
+
+          // app/AppKernel.php
+          class BeachvilleKernel extends Tecbot\AMFBundle\Amf\Kernel
+          {
+              // ...
+          }
+
+  4. Add this bundle to your application's kernel:
 
           // app/AppKernel.php
           public function registerBundles()
@@ -26,33 +34,62 @@ AMF for Symfony2 (not yet stable)
               );
           }
 
-  4. Update your config
+  5. Configure the `amf` service in your config:
 
           # app/config/config.yml
           amf.config:
               services: # Services
-                  UserService: UserBundle:User # Map UserService id from AMF to UserBundle:UserService class
-              class_map: # class mapping. Actionscript (UserVO) to PHP (Application\UserBundle\AMF\VO\UserVO)
-                  UserVO: Application\UserBundle\AMF\VO\UserVO
+                  FooService: FooBarBundle:Foo # Map FooService (alias for AMF) to FooBarBundle:Foo class
+              mapping: # class mapping. Actionscript (FooClassVO) to PHP (Foo\BarBundle\VO\FooClassVO)
+                  FooClassVO : Foo\BarBundle\VO\FooClassVO
+
+  6. Add this configuration if you want to use the `security component`:
+          
+          # app/config/config.yml
+          # Create providers in the security config (add SecurityBundle to your application's kernel)
+          security.config:
+              providers:
+                  foo_provider:
+                      id: foo.bar.provider
+
+          amf.config:
+              services: # Services
+                  FooService: FooBarBundle:Foo # Map FooService (alias for AMF) to FooBarBundle:Foo class
+              mapping: # class mapping. Actionscript (FooClassVO) to PHP (Foo\BarBundle\VO\FooClassVO)
+                  FooClassVO : Foo\BarBundle\VO\FooClassVO
+              security:
+                  provider: foo_provider # reference to the provider name
+                  firewalls:
+                      public:
+                          # Firewall for the method bar in the FooService
+                          service: FooService
+                          method: bar
+                          provider: foo_providerreference
+                  access_control:
+                      # only users with the role IS_AUTHENTICATED_FULLY has acces to the method bar in the FooService
+                      - { service: FooService, method: bar, role: [IS_AUTHENTICATED_FULLY] }
 
 ## Use
 
 ### PHP
 
-add all your AMF services into YourBundle\AMF\ and
+add all your AMF services into FooBundle\AMF\ and
 
-    # add the Service suffix to a class e.g. UserService and extends Tecbot\AMFBundle\Service\Service
-    class UserService extends Service
+    # add the Service suffix to a class e.g. FooService and extends Tecbot\AMFBundle\Amf\Service\Service
+    class FooService extends Tecbot\AMFBundle\Amf\Service\Service
 
     # add the Action suffix to a methode e.g. authenticateAction()
     public function authenticateAction()
+
+    # and finally change the handle function in app*.php to handleAmf requests
+    $kernel->handleAmf(Request::createfromGlobals())->send();
 
 ### Flex
 
     # create RemoteObject
     var userService:RemoteObject = new RemoteObject([DESTINATION]);
     userService.channelSet = [CHANNEL];
-    userService.source = "UserService";
+    userService.source = "FooService";
 
     # call remote service
     var asyncToken : AsyncToken = userService.authenticate([PARAMS]);
