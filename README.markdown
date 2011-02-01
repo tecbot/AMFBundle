@@ -64,9 +64,9 @@ AMF for Symfony2 (not yet stable)
                           # Firewall for the method bar in the FooService
                           service: FooService
                           method: bar
-                          provider: foo_providerreference
+                          provider: foo_provider
                   access_control:
-                      # only users with the role IS_AUTHENTICATED_FULLY has acces to the method bar in the FooService
+                      # only users with the role IS_AUTHENTICATED_FULLY has access to the method bar in the FooService
                       - { service: FooService, method: bar, role: [IS_AUTHENTICATED_FULLY] }
 
 ## Use
@@ -81,7 +81,7 @@ add all your AMF services into FooBundle\AMF\ and
     # add the Action suffix to a methode e.g. authenticateAction()
     public function authenticateAction()
 
-    # and finally change the handle function in app*.php to handleAmf requests
+    # and finally to handle AMF request, change the handle function in app*.php to handleAmf
     $kernel->handleAmf(Request::createfromGlobals())->send();
 
 ### Flex
