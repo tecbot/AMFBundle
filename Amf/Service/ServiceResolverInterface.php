@@ -2,8 +2,14 @@
 
 namespace Tecbot\AMFBundle\Amf\Service;
 
-use Symfony\Component\HttpFoundation\Request;
+use Tecbot\AMFBundle\Amf\Request;
 
+/**
+ * ServiceResolverInterface.
+ * 
+ * @author Thomas Adam <thomas.adam@tebot.de>
+ * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ */
 interface ServiceResolverInterface
 {
     /**
@@ -15,23 +21,22 @@ interface ServiceResolverInterface
      * The resolver must only throw an exception when it should be able to load
      * AMF service but cannot because of some errors made by the developer.
      *
-     * @param string $service A AMF Service
-     * @param string $methode A AMF Service methode
+     * @param  Request       $request A Request instance
      *
      * @return mixed|Boolean A PHP callable representing the AMF Service,
      *                       or false if this resolver is not able to determine the AMF service
      *
      * @throws \InvalidArgumentException|\LogicException If the AMF service can't be found
      */
-    function getService($service, $methode);
+    function getService(Request $request);
 
     /**
      * Returns the arguments to pass to the AMF service.
      *
-     * @param array $params
-     * @param array $service
+     * @param Request $request   A Request instance
+     * @param array   $service
      *
      * @throws \RuntimeException When value for argument given is not provided
      */
-    function getArguments(array $params, array $service);
+    function getArguments(Request $request, array $service);
 }

@@ -4,61 +4,89 @@ namespace Tecbot\AMFBundle\Amf\Service;
 
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
+use Tecbot\AMFBundle\Amf\Request;
 
+/**
+ * ServiceResolver.
+ * 
+ * @author Thomas Adam <thomas.adam@tebot.de>
+ * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ */
 class ServiceResolver implements ServiceResolverInterface
 {
     protected $container;
     protected $parser;
+    protected $services;
+    protected $logger;
 
     /**
      * Constructor.
      *
      * @param ContainerInterface $container A ContainerInterface instance
      * @param ServiceNameParser  $parser    A ServiceNameparser instance
+     * @param array              $services  An array of mapped services
      * @param LoggerInterface    $logger    A LoggerInterface instance
      */
-    public function __construct(ContainerInterface $container, ServiceNameParser $parser, LoggerInterface $logger = null)
+    public function __construct(ContainerInterface $container, ServiceNameParser $parser, array $services = array(), LoggerInterface $logger = null)
     {
         $this->container = $container;
         $this->parser = $parser;
+
+        foreach ($services as $alias => $class) {
+            $this->services[strtolower($alias)] = $class;
+        }
+
         $this->logger = $logger;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getService($service, $methode)
+    public function getService(Request $request)
     {
-        $serviceClass = $this->createService($service);
-        $methode = $methode . 'Action'; // add methode suffix
+        $requestBody = $request->getRequestBody();
 
-        if (!method_exists($serviceClass, $methode)) {
-            throw new \InvalidArgumentException(sprintf('Method "%s::%s" does not exist.', get_class($serviceClass), $methode));
+        $alias = strtolower($requestBody->getSource());
+        if (null === $requestBody || !isset($this->services[$alias])) {
+            throw new \InvalidArgumentException(sprintf('Mapping for AMF service %s not found.', $requestBody->getSource()));
+        }
+
+        $serviceClass = $this->createService($this->services[$alias]);
+        $method = $requestBody->getMethod() . 'Action'; // add method suffix
+
+        if (!method_exists($serviceClass, $method)) {
+            throw new \InvalidArgumentException(sprintf('Method "%s::%s" does not exist.', get_class($serviceClass), $method));
         }
 
         if (null !== $this->logger) {
-            $this->logger->info(sprintf('Using AMF service "%s::%s"', get_class($serviceClass), $methode));
+            $this->logger->info(sprintf('Using AMF service "%s::%s"', get_class($serviceClass), $method));
         }
 
-        return array($serviceClass, $methode);
+        return array($serviceClass, $method);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getArguments(array $params, array $service)
+    public function getArguments(Request $request, array $service)
     {
-        list($serviceClass, $method) = $service;
-        $m = new \ReflectionMethod($serviceClass, $method);
-        $parameters = $m->getParameters();
-        
-        if (0 < count($parameters)) {
-            $params = array_merge($params, $parameters);
+        $requestBody = $request->getRequestBody();
+
+        $arguments = $requestBody->getArguments();
+        if (null === $arguments) {
+            $arguments = array();
         }
-        
-        return $params;
+
+        list($serviceClass, $method) = $service;
+        $r = new \ReflectionMethod($serviceClass, $method);
+        $parameters = $r->getParameters();
+
+        if (0 < count($parameters)) {
+            $arguments = array_merge($arguments, $parameters);
+        }
+
+        return $arguments;
     }
 
     /**

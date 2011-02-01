@@ -5,9 +5,9 @@ namespace Tecbot\AMFBundle\Amf;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 
 /**
- * Description of Kernel
+ * Kernel.
  *
- * @author Thomas
+ * @author Thomas Adam <thomas.adam@tebot.de>
  */
 abstract class Kernel extends BaseKernel
 {

@@ -6,19 +6,17 @@ use Symfony\Component\HttpFoundation\Request as BaseRequest;
 use Zend\Amf\Request\StreamRequest;
 
 /**
- * Description of Request
+ * Request.
  *
- * @author Thomas
+ * @author Thomas Adam <thomas.adam@tebot.de>
  */
 class Request extends BaseRequest
 {
-    /**
-     * @var Zend\Amf\Request\StreamRequest
-     */
     protected $streamRequest;
+    protected $requestBody;
 
     /**
-     * @return Zend\Amf\Request\StreamRequest
+     * @return StreamRequest
      */
     public function getStreamRequest()
     {
@@ -28,5 +26,21 @@ class Request extends BaseRequest
         }
 
         return $this->streamRequest;
+    }
+
+    /**
+     * @return RequestBody 
+     */
+    public function getRequestBody()
+    {
+        return $this->requestBody;
+    }
+
+    /**
+     * @param RequestBody $requestBody 
+     */
+    public function setRequestBody(RequestBody $requestBody)
+    {
+        $this->requestBody = $requestBody;
     }
 }

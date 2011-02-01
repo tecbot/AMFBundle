@@ -6,15 +6,12 @@ use Symfony\Component\HttpFoundation\Response as BaseResponse;
 use Zend\Amf\Response\StreamResponse;
 
 /**
- * Description of Response
+ * Response.
  *
- * @author Thomas
+ * @author Thomas Adam <thomas.adam@tebot.de>
  */
 class Response extends BaseResponse
 {
-    /**
-     * @var StreamResponse 
-     */
     protected $streamResponse;
 
     /**

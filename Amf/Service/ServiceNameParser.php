@@ -7,8 +7,11 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
 
 /**
  * ServiceNameParser converts service from the short notation a:b
- * (BlogBundle:Post) to a fully-qualified class string
- * (Bundle\BlogBundle\AMF\PostService);
+ * (FooBarBundle:Foo) to a fully-qualified class string
+ * (Foo\BarBundle\AMF\FooService);
+ * 
+ * @author Thomas Adam <thomas.adam@tebot.de>
+ * @author Fabien Potencier <fabien.potencier@symfony-project.com>
  */
 class ServiceNameParser
 {

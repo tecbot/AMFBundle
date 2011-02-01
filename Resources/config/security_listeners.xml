@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://www.symfony-project.org/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.symfony-project.org/schema/dic/services http://www.symfony-project.org/schema/dic/services/services-1.0.xsd">
+        
+    <services>
+        
+        <service id="amf.security.access_map" class="%security.access_map.class%" public="false" />
+        
+        <service id="amf.security.context_listener" class="%security.context_listener.class%" public="false">
+            <argument type="service" id="security.context" />
+            <argument type="collection"></argument>
+            <argument />
+            <argument type="service" id="logger" on-invalid="null" />
+        </service>
+        
+        <service id="amf.security.access_listener" class="%security.access_listener.class%" public="false">
+            <argument type="service" id="security.context" />
+            <argument type="service" id="security.access.decision_manager" />
+            <argument type="service" id="amf.security.access_map" />
+            <argument type="service" id="security.authentication.manager" />
+            <argument type="service" id="logger" on-invalid="null" />
+        </service>
+        
+    </services>
+
+</container>

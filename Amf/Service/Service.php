@@ -4,6 +4,11 @@ namespace Tecbot\AMFBundle\Amf\Service;
 
 use Symfony\Component\DependencyInjection\ContainerAware;
 
+/**
+ * Service.
+ * 
+ * @author Thomas Adam <thomas.adam@tebot.de>
+ */
 class Service extends ContainerAware
 {
     /**

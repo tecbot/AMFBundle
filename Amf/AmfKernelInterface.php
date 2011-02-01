@@ -3,7 +3,9 @@
 namespace Tecbot\AMFBundle\Amf;
 
 /**
- * @author Thomas
+ * AmfKernelInterface.
+ * 
+ * @author Thomas Adam <thomas.adam@tebot.de>
  */
 interface AmfKernelInterface
 {
