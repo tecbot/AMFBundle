@@ -10,8 +10,8 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
  * (FooBarBundle:Foo) to a fully-qualified class string
  * (Foo\BarBundle\AMF\FooService);
  * 
- * @author Thomas Adam <thomas.adam@tebot.de>
  * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Thomas Adam <thomas.adam@tebot.de>
  */
 class ServiceNameParser
 {

@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request as BaseRequest;
 /**
  * RequestMatcher.
  *
+ * @author Fabien Potencier <fabien.potencier@symfony-project.com>
  * @author Thomas Adam <thomas.adam@tebot.de>
  */
 class RequestMatcher implements RequestMatcherInterface

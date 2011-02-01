@@ -7,8 +7,8 @@ use Tecbot\AMFBundle\Amf\Request;
 /**
  * ServiceResolverInterface.
  * 
- * @author Thomas Adam <thomas.adam@tebot.de>
  * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ * @author Thomas Adam <thomas.adam@tebot.de>
  */
 interface ServiceResolverInterface
 {
