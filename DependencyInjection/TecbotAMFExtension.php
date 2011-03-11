@@ -2,11 +2,14 @@
 
 namespace Tecbot\AMFBundle\DependencyInjection;
 
-use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\HttpKernel\DependencyInjection\Extension;
+
 
 /**
  * AMFExtension.
@@ -15,7 +18,7 @@ use Symfony\Component\DependencyInjection\Reference;
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  * @author Thomas Adam <thomas.adam@tebot.de>
  */
-class AMFExtension extends Extension
+class TecbotAMFExtension extends Extension
 {
     protected $resources = array(
         'amf' => 'amf.xml',
@@ -33,7 +36,7 @@ class AMFExtension extends Extension
      *          providers:
      *              foo_provider:
      *                  id: foo.bar.provider
-     * 
+     *
      *     amf.config:
      *          services:
      *              FooService: FooBarBundle:Foo
@@ -52,18 +55,18 @@ class AMFExtension extends Extension
      * @param array $configs An array of configuration settings
      * @param ContainerBuilder $container A ContainerBuilder instance
      */
-    public function configLoad($configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container)
     {
         $config = array_shift($configs);
         foreach ($configs as $tmp) {
             $config = array_replace_recursive($config, $tmp);
         }
 
-        $loader = new XmlFileLoader($container, __DIR__ . '/../Resources/config');
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load($this->resources['amf']);
 
-        $container->setParameter('amf.services', Extension::normalizeConfig($config, 'service'));
-        $container->setParameter('amf.mapping', Extension::normalizeConfig($config, 'mapping', 'mapping'));
+        $container->setParameter('amf.services', Processor::normalizeConfig($config, 'service'));
+        $container->setParameter('amf.mapping', Processor::normalizeConfig($config, 'mapping', 'mapping'));
 
         if (isset($config['security'])) {
             $loader->load($this->resources['security']);
@@ -94,10 +97,10 @@ class AMFExtension extends Extension
 
             // matcher
             $services = $methods = $host = $ip = null;
-            if (0 < count($tServices = $this->normalizeConfig($access, 'service'))) {
+            if (0 < count($tServices = Processor::normalizeConfig($access, 'service'))) {
                 $services = $tServices;
             }
-            if (0 < count($tMethods = $this->normalizeConfig($access, 'method'))) {
+            if (0 < count($tMethods = Processor::normalizeConfig($access, 'method'))) {
                 $methods = $tMethods;
             }
             if (isset($access['host'])) {
@@ -115,7 +118,7 @@ class AMFExtension extends Extension
 
     protected function createFirewalls($config, ContainerBuilder $container)
     {
-        if (!$firewalls = $this->normalizeConfig($config, 'firewall')) {
+        if (!$firewalls = Processor::normalizeConfig($config, 'firewall')) {
             return;
         }
 
@@ -123,7 +126,7 @@ class AMFExtension extends Extension
         $definition = $container->getDefinition('amf.security.context_listener');
         $arguments = $definition->getArguments();
         $userProviders = array();
-        $providerIds = $this->normalizeConfig($config, 'provider');
+        $providerIds = Processor::normalizeConfig($config, 'provider');
         foreach ($providerIds as $providerId) {
             $userProviders[] = new Reference($this->getUserProviderId($providerId));
         }
@@ -159,10 +162,10 @@ class AMFExtension extends Extension
     {
 
         $services = $methods = null;
-        if (0 < count($tServices = $this->normalizeConfig($firewall, 'service'))) {
+        if (0 < count($tServices = Processor::normalizeConfig($firewall, 'service'))) {
             $services = $tServices;
         }
-        if (0 < count($tMethods = $this->normalizeConfig($firewall, 'method'))) {
+        if (0 < count($tMethods = Processor::normalizeConfig($firewall, 'method'))) {
             $methods = $tMethods;
         }
 
@@ -244,26 +247,6 @@ class AMFExtension extends Extension
 
     protected function getUserProviderId($name)
     {
-        return 'security.authentication.provider.' . $name;
-    }
-
-    /**
-     * Returns the base path for the XSD files.
-     *
-     * @return string The XSD base path
-     */
-    public function getXsdValidationBasePath()
-    {
-        return null;
-    }
-
-    public function getNamespace()
-    {
-        return 'http://www.tecbot.de/schema/dic/amf';
-    }
-
-    public function getAlias()
-    {
-        return 'amf';
+        return 'security.user.provider.concrete.' . $name;
     }
 }
