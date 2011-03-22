@@ -9,7 +9,7 @@ use Tecbot\AMFBundle\Amf\Request;
 
 /**
  * ServiceResolver.
- * 
+ *
  * @author Fabien Potencier <fabien.potencier@symfony-project.com>
  * @author Thomas Adam <thomas.adam@tebot.de>
  */
@@ -33,8 +33,8 @@ class ServiceResolver implements ServiceResolverInterface
         $this->container = $container;
         $this->parser = $parser;
 
-        foreach ($services as $alias => $class) {
-            $this->services[strtolower($alias)] = $class;
+        foreach ($services as $alias => $service) {
+            $this->services[strtolower($alias)] = $service['class'];
         }
 
         $this->logger = $logger;

@@ -2,11 +2,15 @@
 
 namespace Tecbot\AMFBundle\Amf;
 
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Response as BaseResponse;
+use Symfony\Component\HttpFoundation\Request as BaseRequest;
+use Symfony\Component\HttpKernel\Events;
+use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Tecbot\AMFBundle\Amf\Event\FilterServiceEvent;
+use Tecbot\AMFBundle\Amf\Event\GetBodyResponseEvent;
 use Tecbot\AMFBundle\Amf\Service\ServiceResolverInterface;
 use Zend\Amf\Constants;
 use Zend\Amf\Parser\TypeLoader;
@@ -23,7 +27,7 @@ use Zend\Amf\Value\Messaging\RemotingMessage;
  *
  * @author Thomas Adam <thomas.adam@tebot.de>
  */
-class AmfKernel implements AmfKernelInterface
+class AmfKernel implements HttpKernelInterface
 {
     protected $dispatcher;
     protected $resolver;
@@ -35,38 +39,33 @@ class AmfKernel implements AmfKernelInterface
      * @param EventDispatcherInterface    $dispatcher An EventDispatcherInterface instance
      * @param ControllerResolverInterface $resolver   A ControllerResolverInterface instance
      * @param Boolean                     $debug      Debug mode
-     * @param array                       $mapping    An array of mapped classes
+     * @param array                       $mappings   An array of mapped classes
      */
-    public function __construct(EventDispatcherInterface $dispatcher, ServiceResolverInterface $resolver, $debug = false, array $mapping = array())
+    public function __construct(EventDispatcherInterface $dispatcher, ServiceResolverInterface $resolver, $debug = false, array $mappings = array())
     {
         $this->dispatcher = $dispatcher;
         $this->resolver = $resolver;
         $this->debug = $debug;
 
-        foreach ($mapping as $asClass => $phpClass) {
-            TypeLoader::setMapping($asClass, $phpClass);
+        foreach ($mappings as $alias => $mapping) {
+            TypeLoader::setMapping($alias, $mapping['class']);
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function handle(Request $request)
+    public function handle(BaseRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
     {
-        if ('application/x-amf' !== $request->server->get('CONTENT_TYPE')) {
-            // No AMF request
-            return new BaseResponse('', 403);
-        }
-
         try {
-            $response = $this->handleRaw($request);
+            return $this->handleRaw($request, $type);
         } catch (\Exception $e) {
-            // Handle any errors in the serialization and service calls.
-            // TODO: Create AMF Response
-            throw new \RuntimeException(sprintf('Handle error: %s (%d)', $e->getMessage(), $e->getLine()), 0, $e);
-        }
+            if (false === $catch) {
+                throw $e;
+            }
 
-        return $response;
+            return $this->handleException($e, $request, $type);
+        }
     }
 
     /**
@@ -75,13 +74,14 @@ class AmfKernel implements AmfKernelInterface
      * Exceptions are not caught.
      *
      * @param  Request $request A Request instance
+     * @param  integer $type    The type of the request (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
      *
      * @return Response         A Response instance
      *
      * @throws \LogicException If one of the listener does not behave as expected
      * @throws NotFoundHttpException When service cannot be found
      */
-    protected function handleRaw(Request $request)
+    protected function handleRaw(Request $request, $type = HttpKernelInterface::MASTER_REQUEST)
     {
         // Get the stream request of the request
         $streamRequest = $request->getStreamRequest();
@@ -90,10 +90,10 @@ class AmfKernel implements AmfKernelInterface
         $objectEncoding = $streamRequest->getObjectEncoding();
 
         // create a stream response object to place the output from the services.
-        $response = new StreamResponse();
+        $streamResponse = new StreamResponse();
 
         // set response encoding
-        $response->setObjectEncoding($objectEncoding);
+        $streamResponse->setObjectEncoding($objectEncoding);
 
         // Iterate through each of the service calls in the AMF request
         $bodies = $streamRequest->getAmfBodies();
@@ -110,9 +110,9 @@ class AmfKernel implements AmfKernelInterface
                     if ($source) {
                         // Break off method name from namespace into source
                         $method = substr(strrchr($targetURI, '.'), 1);
-                        $return = $this->handleBody($request, new RequestBody($method, $body->getData(), $source));
+                        $return = $this->handleBody($request, new RequestBody($method, $body->getData(), $source), $type);
                     } else {
-                        throw new NotFoundHttpException(sprintf('Unable to find the AMF service (AMF0). targetURI: %s, service: %s', $targetURI, $source));
+                        throw new NotFoundHttpException(sprintf('Unable to find the AMF service. targetURI: %s, service: %s', $targetURI, $source));
                     }
                 } else {
                     // AMF3 read message type
@@ -122,7 +122,7 @@ class AmfKernel implements AmfKernelInterface
                         $return = $this->loadCommandMessage($message);
                     } elseif ($message instanceof RemotingMessage) {
                         $return = new AcknowledgeMessage($message);
-                        $return->body = $this->handleBody($request, new RequestBody($message->operation, $message->body, $message->source));
+                        $return->body = $this->handleBody($request, new RequestBody($message->operation, $message->body, $message->source), $type);
                     } else {
                         // Amf3 message sent with netConnection
                         $targetURI = $body->getTargetURI();
@@ -133,9 +133,9 @@ class AmfKernel implements AmfKernelInterface
                         if ($source) {
                             // Break off method name from namespace into source
                             $method = substr(strrchr($targetURI, '.'), 1);
-                            $return = $this->handleBody($request, new RequestBody($method, $body->getData(), $source));
+                            $return = $this->handleBody($request, new RequestBody($method, $body->getData(), $source), $type);
                         } else {
-                            throw new NotFoundHttpException(sprintf('Unable to find the AMF service (NetConnection). targetURI: %s, service: %s', $targetURI, $source));
+                            throw new NotFoundHttpException(sprintf('Unable to find the AMF service. targetURI: %s, service: %s', $targetURI, $source));
                         }
                     }
                 }
@@ -147,18 +147,13 @@ class AmfKernel implements AmfKernelInterface
 
             $responseURI = $body->getResponseURI() . $responseType;
             $newBody = new MessageBody($responseURI, null, $return);
-            $response->addAmfBody($newBody);
+            $streamResponse->addAmfBody($newBody);
         }
 
-        // serialize the stream response
-        $response = new Response($response->finalize());
+        $response = new Response($streamResponse);
+        $response = $this->filterResponse($response, $request, $type);
 
-        // Filters the response object.
-//        $response = $this->dispatcher->filter(new Event($this, 'core.response', array('request_type' => HttpKernelInterface::MASTER_REQUEST, 'request' => $request)), $response);
-//
-//        if (!$response instanceof Response) {
-//            throw new \RuntimeException('A "core.response" listener returned a non response object.');
-//        }
+        $response->getStreamResponse()->finalize();
 
         return $response;
     }
@@ -167,20 +162,23 @@ class AmfKernel implements AmfKernelInterface
      * Loads a remote class and executes the function and returns
      * the result.
      *
+     * @param  Request     $request     A Request instance
      * @param  RequestBody $requestBody A RequestBody instance
-     * 
+     * @param  integer     $type        The type of the request (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     *
      * @return mixed                    the result of executing the method
      */
-    protected function handleBody(Request $request, RequestBody $requestBody)
+    protected function handleBody(Request $request, RequestBody $requestBody, $type = HttpKernelInterface::MASTER_REQUEST)
     {
         // Set the current request body
         $request->setRequestBody($requestBody);
 
         // request
-        $event = new Event($this, 'amf.request', array('request_type' => HttpKernelInterface::MASTER_REQUEST, 'request' => $request));
-        $ret = $this->dispatcher->notifyUntil($event);
-        if ($event->isProcessed()) {
-            return $ret;
+        $event = new GetBodyResponseEvent($this, $request, $type, $requestBody);
+        $this->dispatcher->dispatch('tecbot_amf.body_request', $event);
+
+        if ($event->hasBodyResponse()) {
+            return $event->getBodyResponse();
         }
 
         // load service
@@ -188,8 +186,9 @@ class AmfKernel implements AmfKernelInterface
             throw new NotFoundHttpException(sprintf('Unable to find the AMF service. method: %s, arguments: %s, source: %s', $requestBody->getMethod(), var_export($requestBody->getArguments(), true), $requestBody->getSource()));
         }
 
-        $event = new Event($this, 'amf.service', array('request_type' => HttpKernelInterface::MASTER_REQUEST, 'request' => $request));
-        $service = $this->dispatcher->filter($event, $service);
+        $event = new FilterServiceEvent($this, $service, $request, $type);
+        $this->dispatcher->dispatch('tecbot_amf.service', $event);
+        $service = $event->getService();
 
         // service must be a callable
         if (!is_callable($service)) {
@@ -211,7 +210,7 @@ class AmfKernel implements AmfKernelInterface
      * A command message is a flex.messaging.messages.CommandMessage
      *
      * @param  CommandMessage     $message A CommandMessage instance
-     * 
+     *
      * @return AcknowledgeMessage          A AcknowledgeMessage instance
      */
     protected function loadCommandMessage(CommandMessage $message)
@@ -230,6 +229,24 @@ class AmfKernel implements AmfKernelInterface
     }
 
     /**
+     * Filters a response object.
+     *
+     * @param Response  $response A Response instance
+     * @param Request   $request  A Request instance
+     * @param integer   $type     The type of the request (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     *
+     * @return Response           The filtered Response instance
+     */
+    protected function filterResponse(Response $streamResponse, Request $request, $type)
+    {
+        $event = new FilterResponseEvent($this, $request, $type, $streamResponse);
+
+        $this->dispatcher->dispatch('tecbot_amf.response', $event);
+
+        return $event->getResponse();
+    }
+
+    /**
      * Create appropriate error message.
      *
      * @param int    $objectEncoding Current AMF encoding
@@ -238,7 +255,7 @@ class AmfKernel implements AmfKernelInterface
      * @param mixed  $detail         Detailed data about the error
      * @param int    $code           Error code
      * @param int    $line           Error line
-     * 
+     *
      * @return ErrorMessage|array    A ErrorMessage instance or an array
      */
     protected function errorMessage($objectEncoding, $message, $description, $detail, $code, $line)
@@ -268,5 +285,26 @@ class AmfKernel implements AmfKernelInterface
         }
 
         return $return;
+    }
+
+    /**
+     * Handles and exception by trying to convert it to a Response.
+     *
+     * @param  \Exception $e       An \Exception instance
+     * @param  Request    $request A Request instance
+     * @param  integer    $type    The type of the request (one of HttpKernelInterface::MASTER_REQUEST or HttpKernelInterface::SUB_REQUEST)
+     *
+     * @return Response A Response instance
+     */
+    protected function handleException(\Exception $e, $request, $type)
+    {
+        $event = new GetResponseForExceptionEvent($this, $request, $type, $e);
+        $this->dispatcher->dispatch(Events::onCoreException, $event);
+
+        if (!$event->hasResponse()) {
+            throw $e;
+        }
+
+        return $this->filterResponse($event->getResponse(), $request, $type);
     }
 }

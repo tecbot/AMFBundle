@@ -29,7 +29,7 @@ class Request extends BaseRequest
     }
 
     /**
-     * @return RequestBody 
+     * @return RequestBody
      */
     public function getRequestBody()
     {
@@ -37,7 +37,7 @@ class Request extends BaseRequest
     }
 
     /**
-     * @param RequestBody $requestBody 
+     * @param RequestBody $requestBody
      */
     public function setRequestBody(RequestBody $requestBody)
     {

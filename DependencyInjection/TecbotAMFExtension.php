@@ -2,8 +2,8 @@
 
 namespace Tecbot\AMFBundle\DependencyInjection;
 
-use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Definition\Processor;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
@@ -31,50 +31,28 @@ class TecbotAMFExtension extends Extension
     /**
      * Loads the AMF configuration.
      *
-     * Usage example:
-     *     security.config:
-     *          providers:
-     *              foo_provider:
-     *                  id: foo.bar.provider
-     *
-     *     amf.config:
-     *          services:
-     *              FooService: FooBarBundle:Foo
-     *          mapping:
-     *              FooClassVO : Foo\BarBundle\VO\FooClassVO
-     *          security:
-     *              provider: foo_provider
-     *              firewalls:
-     *                  public:
-     *                      service: FooService
-     *                      method: bar
-     *                      provider: foo_provider
-     *              access_control:
-     *                  - { service: FooService, method: bar, role: [IS_AUTHENTICATED_FULLY] }
-     *
-     * @param array $configs An array of configuration settings
+     * @param array            $configs   An array of configuration settings
      * @param ContainerBuilder $container A ContainerBuilder instance
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $config = array_shift($configs);
-        foreach ($configs as $tmp) {
-            $config = array_replace_recursive($config, $tmp);
-        }
+        $processor = new Processor();
+        $configuration = new Configuration();
+        $config = $processor->process($configuration->getConfigTree(), $configs);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load($this->resources['amf']);
 
-        $container->setParameter('amf.services', Processor::normalizeConfig($config, 'service'));
-        $container->setParameter('amf.mapping', Processor::normalizeConfig($config, 'mapping', 'mapping'));
+        $container->setParameter('tecbot_amf.services', $config['services']);
+        $container->setParameter('tecbot_amf.mappings', $config['mappings']);
 
-        if (isset($config['security'])) {
+        /*if (isset($config['security'])) {
             $loader->load($this->resources['security']);
             $loader->load($this->resources['security_listeners']);
 
             $this->createFirewalls($config['security'], $container);
             $this->createAuthorization($config['security'], $container);
-        }
+        }*/
     }
 
     protected function createAuthorization($config, ContainerBuilder $container)
@@ -151,8 +129,7 @@ class TecbotAMFExtension extends Extension
             $context = $container->setDefinition($contextId, new DefinitionDecorator('security.firewall.context'));
             $context
                     ->setArgument(0, $listeners)
-                    ->setArgument(1, $exceptionListener)
-            ;
+                    ->setArgument(1, $exceptionListener);
             $map[$contextId] = $matcher;
         }
         $mapDef->setArgument(1, $map);
@@ -239,8 +216,7 @@ class TecbotAMFExtension extends Extension
         $container
                 ->register($id, '%amf.security.matcher.class%')
                 ->setPublic(false)
-                ->setArguments($arguments)
-        ;
+                ->setArguments($arguments);
 
         return $this->requestMatchers[$id] = new Reference($id);
     }

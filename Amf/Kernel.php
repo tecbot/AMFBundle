@@ -20,6 +20,6 @@ abstract class Kernel extends BaseKernel
             $this->boot();
         }
 
-        return $this->container->get('amf.kernel')->handle($request);
+        return $this->container->get('tecbot_amf.kernel')->handle($request);
     }
 }

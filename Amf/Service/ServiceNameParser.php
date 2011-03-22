@@ -9,7 +9,7 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
  * ServiceNameParser converts service from the short notation a:b
  * (FooBarBundle:Foo) to a fully-qualified class string
  * (Foo\BarBundle\AMF\FooService);
- * 
+ *
  * @author Fabien Potencier <fabien.potencier@symfony-project.com>
  * @author Thomas Adam <thomas.adam@tebot.de>
  */
@@ -47,9 +47,9 @@ class ServiceNameParser
         $bundle = strtr($bundle, array('/' => '\\'));
         $class = null;
         $logs = array();
-        
+
         foreach ($this->kernel->getBundle($bundle, false) as $b) {
-            $try = $b->getNamespace().'\\AMF\\'.$service.'Service';
+            $try = $b->getNamespace() . '\\AMF\\' . $service . 'Service';
             if (!class_exists($try)) {
                 if (null !== $this->logger) {
                     $logs[] = sprintf('Failed finding AMF service "%s:%s" from namespace "%s" (%s)', $bundle, $service, $b->getNamespace(), $try);
