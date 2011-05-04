@@ -20,11 +20,6 @@ use Symfony\Component\HttpKernel\DependencyInjection\Extension;
  */
 class TecbotAMFExtension extends Extension
 {
-    protected $resources = array(
-        'amf' => 'amf.xml',
-        'security' => 'security.xml',
-        'security_listeners' => 'security_listeners.xml',
-    );
     protected $requestMatchers = array();
     protected $contextListeners = array();
 
@@ -38,13 +33,17 @@ class TecbotAMFExtension extends Extension
     {
         $processor = new Processor();
         $configuration = new Configuration();
-        $config = $processor->process($configuration->getConfigTree(), $configs);
+        $config = $processor->processConfiguration($configuration, $configs);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load($this->resources['amf']);
+        $loader->load('amf.xml');
 
         $container->setParameter('tecbot_amf.services', $config['services']);
         $container->setParameter('tecbot_amf.mappings', $config['mappings']);
+
+        if (!empty($config['test'])) {
+            $loader->load('test.xml');
+        }
 
         /*if (isset($config['security'])) {
             $loader->load($this->resources['security']);
