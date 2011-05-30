@@ -49,7 +49,7 @@ class ServiceResolver implements ServiceResolverInterface
 
         $alias = strtolower($requestBody->getSource());
         if (null === $requestBody || !isset($this->services[$alias])) {
-            throw new \InvalidArgumentException(sprintf('Mapping for AMF service %s not found.', $requestBody->getSource()));
+            throw new \InvalidArgumentException(sprintf('Unable to find mapping for AMF service %s.', $requestBody->getSource()));
         }
 
         $serviceClass = $this->createService($this->services[$alias]);

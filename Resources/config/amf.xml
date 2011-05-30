@@ -26,6 +26,7 @@
 
         <service id="tecbot_amf.kernel" class="%tecbot_amf.kernel.class%">
             <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="service_container"/>
             <argument type="service" id="tecbot_amf.service_resolver"/>
             <argument>%kernel.debug%</argument>
             <argument>%tecbot_amf.mappings%</argument>

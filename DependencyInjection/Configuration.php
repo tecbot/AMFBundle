@@ -4,54 +4,68 @@ namespace Tecbot\AMFBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
- * This class contains the configuration information for the bundle
+ * AmfBundle configuration structure.
  *
- * This information is solely responsible for how the different configuration
- * sections are normalized, and merged.
+ * @author Thomas Adam <thomas.adam@tecbot.de>
  */
-class Configuration
+class Configuration implements ConfigurationInterface
 {
     /**
-     * Generates the configuration tree.
+     * Generates the configuration tree builder.
      *
-     * @return \Symfony\Component\DependencyInjection\Configuration\NodeInterface
+     * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
      */
-    public function getConfigTree()
+    public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('tecbot_amf');
 
         $rootNode
-            ->fixXmlConfig('service')
             ->children()
-                ->arrayNode('services')
-                    ->useAttributeAsKey('alias')
-                    ->prototype('array')
-                        ->performNoDeepMerging()
-                        ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
-                        ->children()
-                            ->scalarNode('class')->cannotBeEmpty()->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->fixXmlConfig('mapping')
-            ->children()
-                ->arrayNode('mappings')
-                    ->useAttributeAsKey('alias')
-                    ->prototype('array')
-                        ->performNoDeepMerging()
-                        ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
-                        ->children()
-                            ->scalarNode('class')->cannotBeEmpty()->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
+                ->booleanNode('test')->end()
+            ->end()
         ;
 
-        return $treeBuilder->buildTree();
+        $this->addServiceSection($rootNode);
+        $this->addMappingSection($rootNode);
+
+        return $treeBuilder;
+    }
+
+    private function addServiceSection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->fixXmlConfig('service')
+                ->children()
+                    ->arrayNode('services')
+                        ->useAttributeAsKey('alias')
+                        ->prototype('array')
+                        ->performNoDeepMerging()
+                        ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
+                        ->children()
+                            ->scalarNode('class')->cannotBeEmpty()->end()
+                        ->end()
+                    ->end()
+                ->end();
+    }
+
+    private function addMappingSection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->fixXmlConfig('mapping')
+                ->children()
+                    ->arrayNode('mappings')
+                        ->useAttributeAsKey('alias')
+                        ->prototype('array')
+                        ->performNoDeepMerging()
+                        ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
+                        ->children()
+                            ->scalarNode('class')->cannotBeEmpty()->end()
+                        ->end()
+                    ->end()
+                ->end();
     }
 }

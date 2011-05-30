@@ -29,6 +29,16 @@ class Request extends BaseRequest
     }
 
     /**
+     * @param StreamRequest $streamRequest
+     */
+    public function setStreamRequest(StreamRequest $streamRequest)
+    {
+        $this->streamRequest = $streamRequest;
+
+        return $this->streamRequest;
+    }
+
+    /**
      * @return RequestBody
      */
     public function getRequestBody()
