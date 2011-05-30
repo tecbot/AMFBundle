@@ -37,22 +37,22 @@ AMF for Symfony2 (not yet stable)
   5. Configure the `amf` service in your config:
 
           # app/config/config.yml
-          amf.config:
+          tecbot_amf:
               services: # Services
                   FooService: FooBarBundle:Foo # Map FooService (alias for AMF) to FooBarBundle:Foo class
               mapping: # class mapping. Actionscript (FooClassVO) to PHP (Foo\BarBundle\VO\FooClassVO)
-                  FooClassVO : Foo\BarBundle\VO\FooClassVO
+                  FooClassVO: Foo\BarBundle\VO\FooClassVO
 
   6. Add this configuration if you want to use the `security component` (currently disabled!):
           
           # app/config/config.yml
           # Create providers in the security config (add SecurityBundle to your application's kernel)
-          security.config:
+          security:
               providers:
                   foo_provider:
                       id: foo.bar.provider
 
-          amf.config:
+          tecbot_amf:
               services: # Services
                   FooService: FooBarBundle:Foo # Map FooService (alias for AMF) to FooBarBundle:Foo class
               mapping: # class mapping. Actionscript (FooClassVO) to PHP (Foo\BarBundle\VO\FooClassVO)
