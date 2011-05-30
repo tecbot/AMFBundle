@@ -44,15 +44,13 @@ class ServiceNameParser
         }
 
         list($bundle, $service) = $parts;
-        $bundle = strtr($bundle, array('/' => '\\'));
         $class = null;
         $logs = array();
-
         foreach ($this->kernel->getBundle($bundle, false) as $b) {
             $try = $b->getNamespace() . '\\AMF\\' . $service . 'Service';
             if (!class_exists($try)) {
                 if (null !== $this->logger) {
-                    $logs[] = sprintf('Failed finding AMF service "%s:%s" from namespace "%s" (%s)', $bundle, $service, $b->getNamespace(), $try);
+                    $logs[] = sprintf('Unable to find AMF service "%s:%s" - class "%s" does not exist.', $bundle, $service, $try);
                 }
             } else {
                 $class = $try;
@@ -62,15 +60,32 @@ class ServiceNameParser
         }
 
         if (null === $class) {
-            if (null !== $this->logger) {
-                foreach ($logs as $log) {
-                    $this->logger->info($log);
-                }
-            }
-
-            throw new \InvalidArgumentException(sprintf('Unable to find AMF service "%s:%s".', $bundle, $service));
+            $this->handleControllerNotFoundException($bundle, $service, $logs);
         }
 
         return $class;
+    }
+
+    private function handleControllerNotFoundException($bundle, $service, array $logs)
+    {
+        if (null !== $this->logger) {
+            foreach ($logs as $log) {
+                $this->logger->info($log);
+            }
+        }
+
+        // just one log, return it as the exception
+        if (1 == count($logs)) {
+            throw new \InvalidArgumentException($logs[0]);
+        }
+
+        // many logs, use a message that mentions each searched bundle
+        $names = array();
+        foreach ($this->kernel->getBundle($bundle, false) as $b) {
+            $names[] = $b->getName();
+        }
+        $msg = sprintf('Unable to find AMF service "%s:%s" in bundles %s.', $bundle, $service, implode(', ', $names));
+
+        throw new \InvalidArgumentException($msg);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tecbot\AMFBundle\Amf;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request as BaseRequest;
 use Symfony\Component\HttpKernel\Events;
@@ -29,21 +30,24 @@ use Zend\Amf\Value\Messaging\RemotingMessage;
  */
 class AmfKernel implements HttpKernelInterface
 {
-    protected $dispatcher;
-    protected $resolver;
-    protected $debug;
+    private $dispatcher;
+    private $container;
+    private $resolver;
+    private $debug;
 
     /**
      * Constructor
      *
      * @param EventDispatcherInterface    $dispatcher An EventDispatcherInterface instance
+     * @param ContainerInterface          $container  A ContainerInterface instance
      * @param ControllerResolverInterface $resolver   A ControllerResolverInterface instance
      * @param Boolean                     $debug      Debug mode
      * @param array                       $mappings   An array of mapped classes
      */
-    public function __construct(EventDispatcherInterface $dispatcher, ServiceResolverInterface $resolver, $debug = false, array $mappings = array())
+    public function __construct(EventDispatcherInterface $dispatcher, ContainerInterface $container, ServiceResolverInterface $resolver, $debug = false, array $mappings = array())
     {
         $this->dispatcher = $dispatcher;
+        $this->container = $container;
         $this->resolver = $resolver;
         $this->debug = $debug;
 
@@ -57,15 +61,24 @@ class AmfKernel implements HttpKernelInterface
      */
     public function handle(BaseRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
     {
+        $this->container->enterScope('request');
+        $this->container->set('request', $request, 'request');
+
         try {
-            return $this->handleRaw($request, $type);
+            $response = $this->handleRaw($request, $type);
         } catch (\Exception $e) {
+            $this->container->leaveScope('request');
+
             if (false === $catch) {
                 throw $e;
             }
 
             return $this->handleException($e, $request, $type);
         }
+
+        $this->container->leaveScope('request');
+
+        return $response;
     }
 
     /**
@@ -263,9 +276,7 @@ class AmfKernel implements HttpKernelInterface
         $return = null;
         switch ($objectEncoding) {
             case Constants::AMF0_OBJECT_ENCODING :
-                $return = array(
-                    'code' => $code,
-                );
+                $return = array('code' => $code,);
                 if (false !== $this->debug) {
                     $return['description'] = $description;
                     $return['detail'] = $detail;
@@ -305,6 +316,10 @@ class AmfKernel implements HttpKernelInterface
             throw $e;
         }
 
-        return $this->filterResponse($event->getResponse(), $request, $type);
+        try {
+            return $this->filterResponse($event->getResponse(), $request, $type);
+        } catch (\Exception $e) {
+            return $event->getResponse();
+        }
     }
 }

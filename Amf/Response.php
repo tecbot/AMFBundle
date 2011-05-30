@@ -21,14 +21,12 @@ class Response extends BaseResponse
     {
         $this->streamResponse = $response;
 
-        $headers = array(
+        parent::__construct('', 200, array(
             'Cache-Control' => 'no-cache, must-revalidate',
-            'Expires' => 'Thu, 19 Nov 1981 08:52:00 GMT',
-            'Pragma' => 'no-cache',
-            'Content-Type' => 'application/x-amf'
-        );
-
-        parent::__construct('', 200, $headers);
+            'Expires'       => 'Thu, 19 Nov 1981 08:52:00 GMT',
+            'Pragma'        => 'no-cache',
+            'Content-Type'  => 'application/x-amf'
+        ));
     }
 
     /**
