@@ -73,7 +73,9 @@ class Client extends BaseClient
 
     protected function filterAmfResponse($response)
     {
-        return $response->getStreamResponse()->getResponse();
+        $amfBodies = $response->getStreamResponse()->getAmfBodies();
+
+        return $amfBodies[0]->getData();
     }
 
     protected function getAmfScript($request)
