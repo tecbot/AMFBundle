@@ -43,7 +43,7 @@ AMF for Symfony2 (not yet stable)
               mapping: # class mapping. Actionscript (FooClassVO) to PHP (Foo\BarBundle\VO\FooClassVO)
                   FooClassVO : Foo\BarBundle\VO\FooClassVO
 
-  6. Add this configuration if you want to use the `security component`:
+  6. Add this configuration if you want to use the `security component` (currently disabled!):
           
           # app/config/config.yml
           # Create providers in the security config (add SecurityBundle to your application's kernel)
@@ -71,26 +71,6 @@ AMF for Symfony2 (not yet stable)
 
 ## Use
 
-### PHP
+See [AMFBundle-sandbox][1]
 
-add all your AMF services into FooBundle\AMF\ and
-
-    # add the Service suffix to a class e.g. FooService and extends Tecbot\AMFBundle\Amf\Service\Service
-    class FooService extends Tecbot\AMFBundle\Amf\Service\Service
-
-    # add the Action suffix to a methode e.g. authenticateAction()
-    public function authenticateAction()
-
-    # and finally to handle AMF request, change the handle function in app*.php to handleAmf
-    $kernel->handleAmf(Request::createfromGlobals())->send();
-
-### Flex
-
-    # create RemoteObject
-    var userService:RemoteObject = new RemoteObject([DESTINATION]);
-    userService.channelSet = [CHANNEL];
-    userService.source = "FooService";
-
-    # call remote service
-    var asyncToken : AsyncToken = userService.authenticate([PARAMS]);
-    asyncToken.addResponder(new Responder(this.onAuthenticateResultHandler, this.onAuthenticateFaultHandler));
+[1]: https://github.com/tecbot/AMFBundle-sandbox
