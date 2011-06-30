@@ -2,41 +2,40 @@
 
 namespace Tecbot\AMFBundle\Amf\Service;
 
-use Tecbot\AMFBundle\Amf\Request;
+use Tecbot\AMFBundle\Amf\BodyRequest;
 
 /**
  * ServiceResolverInterface.
- * 
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
+ *
  * @author Thomas Adam <thomas.adam@tebot.de>
  */
 interface ServiceResolverInterface
 {
     /**
-     * Returns the AMF Service instance associated with a service name.
+     * Returns the Amf service instance associated with a service name.
      *
      * As several resolvers can exist for a single application, a resolver must
-     * return false when it is not able to determine the AMF service.
+     * return false when it is not able to determine the Amf service.
      *
      * The resolver must only throw an exception when it should be able to load
-     * AMF service but cannot because of some errors made by the developer.
+     * Amf service but cannot because of some errors made by the developer.
      *
-     * @param  Request       $request A Request instance
+     * @param  BodyRequest   $bodyRequest A BodyRequest instance
      *
-     * @return mixed|Boolean A PHP callable representing the AMF Service,
-     *                       or false if this resolver is not able to determine the AMF service
+     * @return mixed|Boolean A PHP callable representing the Amf service,
+     *                       or false if this resolver is not able to determine the Amf service
      *
-     * @throws \InvalidArgumentException|\LogicException If the AMF service can't be found
+     * @throws \InvalidArgumentException|\LogicException If the Amf service can't be found
      */
-    function getService(Request $request);
+    function getService(BodyRequest $bodyRequest);
 
     /**
-     * Returns the arguments to pass to the AMF service.
+     * Returns the arguments to pass to the Amf service.
      *
-     * @param Request $request   A Request instance
-     * @param array   $service
+     * @param BodyRequest $bodyRequest A BodyRequest instance
+     * @param array       $service
      *
      * @throws \RuntimeException When value for argument given is not provided
      */
-    function getArguments(Request $request, array $service);
+    function getArguments(BodyRequest $bodyRequest, array $service);
 }

@@ -20,52 +20,113 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('tecbot_amf');
+        $tb = new TreeBuilder();
+        $rootNode = $tb->root('tecbot_amf');
 
-        $rootNode
+        /*$rootNode
             ->children()
                 ->booleanNode('test')->end()
             ->end()
-        ;
+        ;*/
 
-        $this->addServiceSection($rootNode);
-        $this->addMappingSection($rootNode);
+        $this->addServicesSection($rootNode);
+        $this->addMappingsSection($rootNode);
+        //$this->addSecuritySection($rootNode);
 
-        return $treeBuilder;
+        return $tb;
     }
 
-    private function addServiceSection(ArrayNodeDefinition $rootNode)
+    private function addServicesSection(ArrayNodeDefinition $rootNode)
     {
         $rootNode
             ->fixXmlConfig('service')
-                ->children()
-                    ->arrayNode('services')
-                        ->useAttributeAsKey('alias')
-                        ->prototype('array')
+            ->children()
+                ->arrayNode('services')
+                    ->useAttributeAsKey('alias')
+                    ->prototype('array')
                         ->performNoDeepMerging()
                         ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
                         ->children()
                             ->scalarNode('class')->cannotBeEmpty()->end()
                         ->end()
                     ->end()
-                ->end();
+                ->end()
+            ->end()
+        ;
     }
 
-    private function addMappingSection(ArrayNodeDefinition $rootNode)
+    private function addMappingsSection(ArrayNodeDefinition $rootNode)
     {
         $rootNode
             ->fixXmlConfig('mapping')
-                ->children()
-                    ->arrayNode('mappings')
-                        ->useAttributeAsKey('alias')
-                        ->prototype('array')
+            ->children()
+                ->arrayNode('mappings')
+                    ->useAttributeAsKey('alias')
+                    ->prototype('array')
                         ->performNoDeepMerging()
                         ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
                         ->children()
                             ->scalarNode('class')->cannotBeEmpty()->end()
                         ->end()
                     ->end()
-                ->end();
+                ->end()
+            ->end()
+        ;
+    }
+
+    private function addSecuritySection(ArrayNodeDefinition $rootNode)
+    {
+        $rootNode
+            ->children()
+                ->arrayNode('security')
+                    ->fixXmlConfig('firewall')
+                    ->children()
+                        ->arrayNode('firewalls')
+                            ->isRequired()
+                            ->requiresAtLeastOneElement()
+                            ->disallowNewKeysInSubsequentConfigs()
+                            ->useAttributeAsKey('name')
+                            ->prototype('array')
+                                ->children()
+                                    ->scalarNode('provider')->isRequired()->cannotBeEmpty()->end()
+                                    ->arrayNode('services')
+                                        ->beforeNormalization()->ifString()->then(function($v) { return preg_split('/\s*,\s*/', $v); })->end()
+                                        ->prototype('scalar')->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                    ->fixXmlConfig('rule', 'access_control')
+                    ->children()
+                        ->arrayNode('access_control')
+                            ->cannotBeOverwritten()
+                            ->prototype('array')
+                                ->children()
+                                    ->scalarNode('requires_channel')->defaultNull()->end()
+                                    ->arrayNode('services')
+                                        ->beforeNormalization()->ifString()->then(function($v) { return preg_split('/\s*,\s*/', $v); })->end()
+                                        ->prototype('scalar')->end()
+                                    ->end()
+                                    ->scalarNode('host')->defaultNull()->end()
+                                    ->scalarNode('ip')->defaultNull()->end()
+                                    ->arrayNode('methods')
+                                        ->beforeNormalization()->ifString()->then(function($v) { return preg_split('/\s*,\s*/', $v); })->end()
+                                        ->prototype('scalar')->end()
+                                    ->end()
+                                ->end()
+                                ->fixXmlConfig('role')
+                                ->children()
+                                    ->arrayNode('roles')
+                                        ->beforeNormalization()->ifString()->then(function($v) { return preg_split('/\s*,\s*/', $v); })->end()
+                                        ->prototype('scalar')->end()
+                                    ->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
     }
 }

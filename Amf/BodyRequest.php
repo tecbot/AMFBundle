@@ -3,11 +3,11 @@
 namespace Tecbot\AMFBundle\Amf;
 
 /**
- * RequestBody.
+ * BodyRequest.
  *
  * @author Thomas Adam <thomas.adam@tebot.de>
  */
-class RequestBody
+class BodyRequest
 {
     protected $method;
     protected $arguments;

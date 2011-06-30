@@ -11,7 +11,7 @@
     <services>
 
         <service id="tecbot_amf.security.firewall" class="%security.firewall.class%">
-            <tag name="kernel.listener" event="tecbot_amf.request" method="handle" priority="-128"/>
+            <tag name="kernel.event_listener" event="tecbot_amf.request" method="onAmfRequest" priority="64"/>
             <argument type="service" id="tecbot_amf.security.firewall.map"/>
             <argument type="service" id="event_dispatcher"/>
         </service>

@@ -8,9 +8,8 @@ use Symfony\Component\HttpKernel\Log\LoggerInterface;
 /**
  * ServiceNameParser converts service from the short notation a:b
  * (FooBarBundle:Foo) to a fully-qualified class string
- * (Foo\BarBundle\AMF\FooService);
+ * (Foo\BarBundle\Amf\FooService);
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
  * @author Thomas Adam <thomas.adam@tebot.de>
  */
 class ServiceNameParser
@@ -33,24 +32,24 @@ class ServiceNameParser
     /**
      * Converts a short notation a:b to a class.
      *
-     * @param string $service A short notation AMF service (a:b)
+     * @param string $service A short notation Amf service (a:b)
      *
      * @param string A service (class)
      */
     public function parse($service)
     {
         if (2 != count($parts = explode(':', $service))) {
-            throw new \InvalidArgumentException(sprintf('The "%s" AMF service is not a valid a:b AMF service string.', $service));
+            throw new \InvalidArgumentException(sprintf('The "%s" Amf service is not a valid a:b Amf service string.', $service));
         }
 
         list($bundle, $service) = $parts;
         $class = null;
         $logs = array();
         foreach ($this->kernel->getBundle($bundle, false) as $b) {
-            $try = $b->getNamespace() . '\\AMF\\' . $service . 'Service';
+            $try = $b->getNamespace() . '\\Amf\\' . $service . 'Service';
             if (!class_exists($try)) {
                 if (null !== $this->logger) {
-                    $logs[] = sprintf('Unable to find AMF service "%s:%s" - class "%s" does not exist.', $bundle, $service, $try);
+                    $logs[] = sprintf('Unable to find Amf service "%s:%s" - class "%s" does not exist.', $bundle, $service, $try);
                 }
             } else {
                 $class = $try;
@@ -84,7 +83,7 @@ class ServiceNameParser
         foreach ($this->kernel->getBundle($bundle, false) as $b) {
             $names[] = $b->getName();
         }
-        $msg = sprintf('Unable to find AMF service "%s:%s" in bundles %s.', $bundle, $service, implode(', ', $names));
+        $msg = sprintf('Unable to find Amf service "%s:%s" in bundles %s.', $bundle, $service, implode(', ', $names));
 
         throw new \InvalidArgumentException($msg);
     }

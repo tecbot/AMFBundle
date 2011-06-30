@@ -5,12 +5,20 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="tecbot_amf.kernel.class">Tecbot\AMFBundle\Amf\AmfKernel</parameter>
+        <parameter key="tecbot_amf.server.class">Tecbot\AMFBundle\Amf\Server</parameter>
         <parameter key="tecbot_amf.service_resolver.class">Tecbot\AMFBundle\Amf\Service\ServiceResolver</parameter>
         <parameter key="tecbot_amf.service_name_parser.class">Tecbot\AMFBundle\Amf\Service\ServiceNameParser</parameter>
     </parameters>
 
     <services>
+
+        <service id="tecbot_amf.server" class="%tecbot_amf.server.class%">
+            <argument type="service" id="event_dispatcher"/>
+            <argument type="service" id="service_container"/>
+            <argument type="service" id="tecbot_amf.service_resolver"/>
+            <argument>%kernel.debug%</argument>
+            <argument>%tecbot_amf.mappings%</argument>
+        </service>
 
         <service id="tecbot_amf.service_name_parser" class="%tecbot_amf.service_name_parser.class%" public="false">
             <argument type="service" id="kernel"/>
@@ -22,14 +30,6 @@
             <argument type="service" id="tecbot_amf.service_name_parser"/>
             <argument>%tecbot_amf.services%</argument>
             <argument type="service" id="logger" on-invalid="ignore"/>
-        </service>
-
-        <service id="tecbot_amf.kernel" class="%tecbot_amf.kernel.class%">
-            <argument type="service" id="event_dispatcher"/>
-            <argument type="service" id="service_container"/>
-            <argument type="service" id="tecbot_amf.service_resolver"/>
-            <argument>%kernel.debug%</argument>
-            <argument>%tecbot_amf.mappings%</argument>
         </service>
 
     </services>

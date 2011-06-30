@@ -5,12 +5,11 @@ namespace Tecbot\AMFBundle\Amf\Service;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
-use Tecbot\AMFBundle\Amf\Request;
+use Tecbot\AMFBundle\Amf\BodyRequest;
 
 /**
  * ServiceResolver.
  *
- * @author Fabien Potencier <fabien.potencier@symfony-project.com>
  * @author Thomas Adam <thomas.adam@tebot.de>
  */
 class ServiceResolver implements ServiceResolverInterface
@@ -43,24 +42,22 @@ class ServiceResolver implements ServiceResolverInterface
     /**
      * {@inheritdoc}
      */
-    public function getService(Request $request)
+    public function getService(BodyRequest $bodyRequest)
     {
-        $requestBody = $request->getRequestBody();
-
-        $alias = strtolower($requestBody->getSource());
-        if (null === $requestBody || !isset($this->services[$alias])) {
-            throw new \InvalidArgumentException(sprintf('Unable to find mapping for AMF service %s.', $requestBody->getSource()));
+        $alias = strtolower($bodyRequest->getSource());
+        if (!isset($this->services[$alias])) {
+            throw new \InvalidArgumentException(sprintf('Unable to find mapping for Amf service %s.', $alias));
         }
 
         $serviceClass = $this->createService($this->services[$alias]);
-        $method = $requestBody->getMethod() . 'Action'; // add method suffix
+        $method = $bodyRequest->getMethod() . 'Action'; // add method suffix
 
         if (!method_exists($serviceClass, $method)) {
             throw new \InvalidArgumentException(sprintf('Method "%s::%s" does not exist.', get_class($serviceClass), $method));
         }
 
         if (null !== $this->logger) {
-            $this->logger->info(sprintf('Using AMF service "%s::%s"', get_class($serviceClass), $method));
+            $this->logger->info(sprintf('Using Amf service "%s::%s"', get_class($serviceClass), $method));
         }
 
         return array($serviceClass, $method);
@@ -69,11 +66,9 @@ class ServiceResolver implements ServiceResolverInterface
     /**
      * {@inheritdoc}
      */
-    public function getArguments(Request $request, array $service)
+    public function getArguments(BodyRequest $bodyRequest, array $service)
     {
-        $requestBody = $request->getRequestBody();
-
-        $arguments = $requestBody->getArguments();
+        $arguments = $bodyRequest->getArguments();
         if (null === $arguments) {
             $arguments = array();
         }
@@ -92,7 +87,7 @@ class ServiceResolver implements ServiceResolverInterface
     /**
      * Returns a callable for the given amf service.
      *
-     * @param  string $service A AMF Service string
+     * @param  string $service A Amf Service string
      *
      * @return mixed  A PHP callable
      */
@@ -100,13 +95,13 @@ class ServiceResolver implements ServiceResolverInterface
     {
         $count = substr_count($service, ':');
         if (1 == $count) {
-            // AMF service in the a:b notation then
+            // Amf service in the a:b notation then
             $service = $this->parser->parse($service);
         } else if (0 == $count) {
-            // AMF service in the service notation
+            // Amf service in the service notation
             return $this->container->get($service);
         } else {
-            throw new \LogicException(sprintf('Unable to parse the AMF service name "%s".', $service));
+            throw new \LogicException(sprintf('Unable to parse the Amf service name "%s".', $service));
         }
 
         if (!class_exists($service)) {

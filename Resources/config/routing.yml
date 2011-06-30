@@ -1,0 +1,3 @@
+tecbot_amf_gateway:
+    pattern: /gateway
+    defaults: { _controller: tecbot_amf.controller.gateway:gatewayAction }

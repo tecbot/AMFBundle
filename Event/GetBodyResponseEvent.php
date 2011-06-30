@@ -1,46 +1,52 @@
 <?php
 
-namespace Tecbot\AMFBundle\Amf\Event;
+namespace Tecbot\AMFBundle\Event;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\KernelEvent;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Tecbot\AMFBundle\Amf\RequestBody;
+use Symfony\Component\EventDispatcher\Event;
+use Tecbot\AMFBundle\Amf\BodyRequest;
 
 /**
- * Allows to create a body response for a request
+ * Allows to create a body response for a body request
  *
  * Call setBodyResponse() to set the body response that will be returned for the
- * current request. The propagation of this event is stopped as soon as a
+ * current body request. The propagation of this event is stopped as soon as a
  * response is set.
  *
  * @author Thomas Adam <thomas.adam@tecbot.de>
  */
-class GetBodyResponseEvent extends KernelEvent
+class GetBodyResponseEvent extends Event
 {
+    /**
+     * The current body request
+     *
+     * @var BodyRequest
+     */
+    private $bodyRequest;
     /**
      * The body response object
      *
      * @var mixed
      */
     private $bodyResponse;
-    private $requestBody;
 
-    public function __construct(HttpKernelInterface $kernel, Request $request, $requestType, RequestBody $requestBody)
+    /**
+     * Constructor.
+     *
+     * @param BodyRequest $bodyRequest
+     */
+    public function __construct(BodyRequest $bodyRequest)
     {
-        parent::__construct($kernel, $request, $requestType);
-
-        $this->requestBody = $requestBody;
+        $this->bodyRequest = $bodyRequest;
     }
 
     /**
-     * Returns the request body object
+     * Returns the current body request object
      *
-     * @return RequestBody
+     * @return BodyRequest
      */
-    public function getRequestBody()
+    public function getBodyRequest()
     {
-        return $this->requestBody;
+        return $this->bodyRequest;
     }
 
     /**
@@ -56,7 +62,7 @@ class GetBodyResponseEvent extends KernelEvent
     /**
      * Sets a body response and stops event propagation
      *
-     * @param mixed $response
+     * @param mixed $bodyResponse
      */
     public function setBodyResponse($bodyResponse)
     {
