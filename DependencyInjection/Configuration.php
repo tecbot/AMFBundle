@@ -31,7 +31,6 @@ class Configuration implements ConfigurationInterface
 
         $this->addServicesSection($rootNode);
         $this->addMappingsSection($rootNode);
-        //$this->addSecuritySection($rootNode);
 
         return $tb;
     }
@@ -67,62 +66,6 @@ class Configuration implements ConfigurationInterface
                         ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
                         ->children()
                             ->scalarNode('class')->cannotBeEmpty()->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
-    }
-
-    private function addSecuritySection(ArrayNodeDefinition $rootNode)
-    {
-        $rootNode
-            ->children()
-                ->arrayNode('security')
-                    ->fixXmlConfig('firewall')
-                    ->children()
-                        ->arrayNode('firewalls')
-                            ->isRequired()
-                            ->requiresAtLeastOneElement()
-                            ->disallowNewKeysInSubsequentConfigs()
-                            ->useAttributeAsKey('name')
-                            ->prototype('array')
-                                ->children()
-                                    ->scalarNode('provider')->isRequired()->cannotBeEmpty()->end()
-                                    ->arrayNode('services')
-                                        ->beforeNormalization()->ifString()->then(function($v) { return preg_split('/\s*,\s*/', $v); })->end()
-                                        ->prototype('scalar')->end()
-                                    ->end()
-                                ->end()
-                            ->end()
-                        ->end()
-                    ->end()
-                    ->fixXmlConfig('rule', 'access_control')
-                    ->children()
-                        ->arrayNode('access_control')
-                            ->cannotBeOverwritten()
-                            ->prototype('array')
-                                ->children()
-                                    ->scalarNode('requires_channel')->defaultNull()->end()
-                                    ->arrayNode('services')
-                                        ->beforeNormalization()->ifString()->then(function($v) { return preg_split('/\s*,\s*/', $v); })->end()
-                                        ->prototype('scalar')->end()
-                                    ->end()
-                                    ->scalarNode('host')->defaultNull()->end()
-                                    ->scalarNode('ip')->defaultNull()->end()
-                                    ->arrayNode('methods')
-                                        ->beforeNormalization()->ifString()->then(function($v) { return preg_split('/\s*,\s*/', $v); })->end()
-                                        ->prototype('scalar')->end()
-                                    ->end()
-                                ->end()
-                                ->fixXmlConfig('role')
-                                ->children()
-                                    ->arrayNode('roles')
-                                        ->beforeNormalization()->ifString()->then(function($v) { return preg_split('/\s*,\s*/', $v); })->end()
-                                        ->prototype('scalar')->end()
-                                    ->end()
-                                ->end()
-                            ->end()
                         ->end()
                     ->end()
                 ->end()

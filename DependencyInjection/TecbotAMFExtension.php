@@ -36,9 +36,9 @@ class TecbotAMFExtension extends Extension
         $container->setParameter('tecbot_amf.services', $config['services']);
         $container->setParameter('tecbot_amf.mappings', $config['mappings']);
 
-        if (!empty($config['test'])) {
+        /*if (!empty($config['test'])) {
             $loader->load('test.xml');
-        }
+        }*/
 
         $this->addClassesToCompile(array(
                 'Tecbot\\AMFBundle\\Amf\\AmfEvents',
