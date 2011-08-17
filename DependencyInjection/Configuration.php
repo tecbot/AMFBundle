@@ -13,6 +13,13 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
+    private $debug;
+
+    public function __construct($debug = false)
+    {
+        $this->debug = $debug;
+    }
+
     /**
      * Generates the configuration tree builder.
      *
@@ -23,53 +30,38 @@ class Configuration implements ConfigurationInterface
         $tb = new TreeBuilder();
         $rootNode = $tb->root('tecbot_amf');
 
-        /*$rootNode
-            ->children()
-                ->booleanNode('test')->end()
-            ->end()
-        ;*/
-
-        $this->addServicesSection($rootNode);
-        $this->addMappingsSection($rootNode);
+        $this->addMetaDataSection($rootNode);
 
         return $tb;
     }
 
-    private function addServicesSection(ArrayNodeDefinition $rootNode)
+    private function addServicesSection(ArrayNodeDefinition $node)
     {
-        $rootNode
-            ->fixXmlConfig('service')
+        $node
             ->children()
-                ->arrayNode('services')
-                    ->useAttributeAsKey('alias')
-                    ->prototype('array')
-                        ->performNoDeepMerging()
-                        ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
-                        ->children()
-                            ->scalarNode('class')->cannotBeEmpty()->end()
+                ->arrayNode('metadata')
+                    ->addDefaultsIfNotSet()
+                    ->fixXmlConfig('directory', 'directories')
+                    ->children()
+                        ->scalarNode('cache')->defaultValue('file')->end()
+                        ->booleanNode('debug')->defaultValue($this->debug)->end()
+                        ->arrayNode('file_cache')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('dir')->defaultValue('%kernel.cache_dir%/amf')->end()
+                            ->end()
+                        ->end()
+                        ->booleanNode('auto_detection')->defaultTrue()->end()
+                        ->arrayNode('directories')
+                            ->prototype('array')
+                                ->children()
+                                    ->scalarNode('path')->isRequired()->end()
+                                    ->scalarNode('namespace_prefix')->defaultValue('')->end()
+                                ->end()
+                            ->end()
                         ->end()
                     ->end()
                 ->end()
-            ->end()
-        ;
-    }
-
-    private function addMappingsSection(ArrayNodeDefinition $rootNode)
-    {
-        $rootNode
-            ->fixXmlConfig('mapping')
-            ->children()
-                ->arrayNode('mappings')
-                    ->useAttributeAsKey('alias')
-                    ->prototype('array')
-                        ->performNoDeepMerging()
-                        ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
-                        ->children()
-                            ->scalarNode('class')->cannotBeEmpty()->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
+            ->end();
     }
 }
