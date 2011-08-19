@@ -1,36 +1,30 @@
 <?php
 
-namespace Tecbot\AmfBundle\Metadata\Driver;
+namespace Tecbot\AMFBundle\Metadata\Driver;
+
+use JMS\SerializerBundle\Metadata\Driver\XmlDriver as BaseXmlDriver;
 
 use Metadata\Driver\AbstractFileDriver;
 
-use Tecbot\AmfBundle\Metadata\ClassMetadata;
+use Tecbot\AMFBundle\Metadata\ClassMetadata;
 
 use RuntimeException;
 
-class XmlDriver extends AbstractFileDriver
+class XmlDriver extends BaseXmlDriver
 {
     protected function loadMetadataFromFile(\ReflectionClass $class, $path)
     {
-        $elem = simplexml_load_file($path);
+        $baseMetadata = parent::loadMetadataFromFile($class, $path);
 
         $metadata = new ClassMetadata($name = $class->getName());
-        if (!$elems = $elem->xpath("./class[@name = '" . $name . "']")) {
-            throw new RuntimeException(sprintf('Could not find class %s inside XML element.', $name));
-        }
+        $metadata->merge($baseMetadata);
+
+        $elem = simplexml_load_file($path);
+        $elems = $elem->xpath("./class[@name = '".$name."']");
         $elem = reset($elems);
 
-        $metadata->fileResources[] = $path;
-        $metadata->fileResources[] = $class->getFileName();
-
-        if ($elem->getName() == 'service') {
-            $metadata->isService = true;
-        } else if ($elem->getName() == 'vo') {
-            $metadata->isVo = true;
-        }
-
-        if (isset($elem['alias'])) {
-            $class->alias = (string)$elem['alias'];
+        if (null !== $voClass = $elem->attributes()->{'vo-class'}) {
+            $metadata->voClass = (string)$voClass;
         }
 
         return $metadata;

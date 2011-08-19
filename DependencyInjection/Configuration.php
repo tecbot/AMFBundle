@@ -30,7 +30,14 @@ class Configuration implements ConfigurationInterface
         $tb = new TreeBuilder();
         $rootNode = $tb->root('tecbot_amf');
 
-        $this->addMetaDataSection($rootNode);
+        $rootNode
+            ->addDefaultsIfNotSet()
+            ->children()
+                ->booleanNode('use_serialization')->defaultFalse()->end()
+            ->end();
+
+        $this->addServicesSection($rootNode);
+        $this->addMappingsSection($rootNode);
 
         return $tb;
     }
@@ -38,30 +45,38 @@ class Configuration implements ConfigurationInterface
     private function addServicesSection(ArrayNodeDefinition $node)
     {
         $node
+            ->fixXmlConfig('service')
             ->children()
-                ->arrayNode('metadata')
-                    ->addDefaultsIfNotSet()
-                    ->fixXmlConfig('directory', 'directories')
-                    ->children()
-                        ->scalarNode('cache')->defaultValue('file')->end()
-                        ->booleanNode('debug')->defaultValue($this->debug)->end()
-                        ->arrayNode('file_cache')
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->scalarNode('dir')->defaultValue('%kernel.cache_dir%/amf')->end()
-                            ->end()
-                        ->end()
-                        ->booleanNode('auto_detection')->defaultTrue()->end()
-                        ->arrayNode('directories')
-                            ->prototype('array')
-                                ->children()
-                                    ->scalarNode('path')->isRequired()->end()
-                                    ->scalarNode('namespace_prefix')->defaultValue('')->end()
-                                ->end()
-                            ->end()
+                ->arrayNode('services')
+                    ->useAttributeAsKey('alias')
+                    ->prototype('array')
+                        ->performNoDeepMerging()
+                        ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
+                        ->children()
+                            ->scalarNode('class')->cannotBeEmpty()->end()
                         ->end()
                     ->end()
                 ->end()
-            ->end();
+            ->end()
+        ;
+    }
+
+    private function addMappingsSection(ArrayNodeDefinition $node)
+    {
+        $node
+            ->fixXmlConfig('mapping')
+            ->children()
+                ->arrayNode('mappings')
+                    ->useAttributeAsKey('alias')
+                    ->prototype('array')
+                        ->performNoDeepMerging()
+                        ->beforeNormalization()->ifString()->then(function($v) { return array('class' => $v); })->end()
+                        ->children()
+                            ->scalarNode('class')->cannotBeEmpty()->end()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace Tecbot\AmfBundle\Metadata\Driver;
+namespace Tecbot\AMFBundle\Metadata\Driver;
 
 use Metadata\Driver\AbstractFileDriver;
 
-use Tecbot\AmfBundle\Metadata\ClassMetadata;
+use Tecbot\AMFBundle\Metadata\ClassMetadata;
 
 class PhpDriver extends AbstractFileDriver
 {

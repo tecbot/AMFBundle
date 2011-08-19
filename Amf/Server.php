@@ -241,7 +241,7 @@ class Server
         $return = null;
         switch ($objectEncoding) {
             case Constants::AMF0_OBJECT_ENCODING :
-                $return = array('code' => $code,);
+                $return = array('code' => $code);
                 if (false !== $this->debug) {
                     $return['description'] = $description;
                     $return['detail'] = $detail;

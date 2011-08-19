@@ -1,6 +1,8 @@
 <?php
 
-namespace Tecbot\AmfBundle\Metadata;
+namespace Tecbot\AMFBundle\Metadata;
+
+use JMS\SerializerBundle\Metadata\ClassMetadata as BaseClassMetadata;
 
 use Metadata\MergeableInterface;
 use Metadata\MethodMetadata;
@@ -8,30 +10,27 @@ use Metadata\MergeableClassMetadata;
 
 use InvalidArgumentException;
 
-class ClassMetadata extends MergeableClassMetadata
+class ClassMetadata extends BaseClassMetadata
 {
-    public $isService;
-    public $isVo;
-    public $alias;
+    public $voClass;
 
     public function merge(MergeableInterface $object)
     {
-        if (!$object instanceof ClassMetadata) {
+        if (!$object instanceof BaseClassMetadata) {
             throw new InvalidArgumentException('$object must be an instance of ClassMetadata.');
         }
         parent::merge($object);
 
-        $this->isService = $object->isService;
-        $this->isVo = $object->isVo;
-        $this->alias = $object->alias;
+
+        if($object instanceof ClassMetadata && null !== $object->voClass) {
+            $this->voClass = $object->voClass;
+        }
     }
 
     public function serialize()
     {
         return serialize(array(
-            $this->isService,
-            $this->isVo,
-            $this->alias,
+            $this->voClass,
             parent::serialize(),
         ));
     }
@@ -39,9 +38,7 @@ class ClassMetadata extends MergeableClassMetadata
     public function unserialize($str)
     {
         list(
-            $this->isService,
-            $this->isVo,
-            $this->alias,
+            $this->voClass,
             $parentStr
         ) = unserialize($str);
 

@@ -31,49 +31,20 @@ class TecbotAMFExtension extends Extension
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
 
-        foreach (array('amf', 'controller', 'metadata') as $name) {
+        foreach (array('amf', 'controller') as $name) {
             $loader->load(sprintf('%s.xml', $name));
         }
 
-        // metadata
-        if ('none' === $config['metadata']['cache']) {
-            $container->removeAlias('tecbot_amf.metadata.cache');
-        } else if ('file' === $config['metadata']['cache']) {
-            $container
-                ->getDefinition('tecbot_amf.metadata.cache.file_cache')
-                ->replaceArgument(0, $config['metadata']['file_cache']['dir'])
-            ;
+        // services & value objects
+        $container->setParameter('tecbot_amf.services', $config['services']);
+        $container->setParameter('tecbot_amf.mappings', $config['mappings']);
 
-            $dir = $container->getParameterBag()->resolveValue($config['metadata']['file_cache']['dir']);
-            if (!file_exists($dir)) {
-                if (!$rs = @mkdir($dir, 0777, true)) {
-                    throw new RuntimeException(sprintf('Could not create cache directory "%s".', $dir));
-                }
-            }
-        } else {
-            $container->setAlias('tecbot_amf.metadata.cache', new Alias($config['metadata']['cache'], false));
-        }
-        $container
-            ->getDefinition('tecbot_amf.metadata_factory')
-            ->replaceArgument(2, $config['metadata']['debug'])
-        ;
-
-        // directories
-        $directories = array();
-        if ($config['metadata']['auto_detection']) {
-            foreach ($container->getParameter('kernel.bundles') as $name => $class) {
-                $ref = new \ReflectionClass($class);
-
-                $directories[$ref->getNamespaceName()] = dirname($ref->getFileName()).'/Resources/config/amf';
+        // serialization
+        if (true === $config['use_serialization']) {
+            foreach (array('metadata', 'serializer') as $name) {
+                $loader->load(sprintf('%s.xml', $name));
             }
         }
-        foreach ($config['metadata']['directories'] as $directory) {
-            $directories[rtrim($directory['namespace_prefix'], '\\')] = rtrim($directory['path'], '\\/');
-        }
-        $container
-            ->getDefinition('tecbot_amf.metadata.file_locator')
-            ->replaceArgument(0, $directories)
-        ;
 
         $this->addClassesToCompile(array(
                 'Tecbot\\AMFBundle\\Amf\\AmfEvents',

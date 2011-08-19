@@ -1,41 +1,32 @@
 <?php
 
-namespace Tecbot\AmfBundle\Metadata\Driver;
+namespace Tecbot\AMFBundle\Metadata\Driver;
+
+use JMS\SerializerBundle\Metadata\Driver\YamlDriver as BaseYamlDriver;
 
 use Metadata\Driver\AbstractFileDriver;
 use Metadata\Driver\DriverInterface;
 
 use Symfony\Component\Yaml\Yaml;
 
-use Tecbot\AmfBundle\Metadata\ClassMetadata;
+use Tecbot\AMFBundle\Metadata\ClassMetadata;
 
 use RuntimeException;
 
-class YamlDriver extends AbstractFileDriver
+class YamlDriver extends BaseYamlDriver
 {
     protected function loadMetadataFromFile(\ReflectionClass $class, $file)
     {
+        $baseClassMetadata = parent::loadMetadataFromFile($class, $file);
+
+        $classMetadata = new ClassMetadata($name = $class->getName());
+        $classMetadata->merge($baseClassMetadata);
+
         $config = Yaml::parse(file_get_contents($file));
+        $config = $config[$class->getName()];
 
-        if (!isset($config[$name = $class->getName()])) {
-            throw new RuntimeException(sprintf('Expected metadata for class %s to be defined in %s.', $class->getName(), $file));
-        }
-
-        $config = $config[$name];
-        $metadata = new ClassMetadata($name);
-        $metadata->fileResources[] = $file;
-        $metadata->fileResources[] = $class->getFileName();
-
-        $config['type'] = isset($config['type']) ? $config['type'] : 'vo';
-
-        if ($config['type'] === 'service') {
-            $metadata->isService = true;
-        } else if ($config['type'] === 'vo') {
-            $metadata->isVo = true;
-        }
-
-        if (isset($config['alias'])) {
-            $class->alias = (string)$config['alias'];
+        if (isset($config['vo_class'])) {
+            $metadata->voClass = (string)$config['vo_class'];
         }
 
         return $metadata;
