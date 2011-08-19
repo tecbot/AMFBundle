@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="tecbot_amf.metadata.yaml_driver" class="Tecbot\AMFBundle\Metadata\Driver\YamlDriver" public="false">
+            <argument type="service" id="jms_serializer.metadata.file_locator" />
+        </service>
+
+        <service id="tecbot_amf.metadata.xml_driver" class="Tecbot\AMFBundle\Metadata\Driver\XmlDriver" public="false">
+            <argument type="service" id="jms_serializer.metadata.file_locator" />
+        </service>
+
+        <service id="tecbot_amf.metadata.php_driver" class="Tecbot\AMFBundle\Metadata\Driver\PhpDriver" public="false">
+            <argument type="service" id="jms_serializer.metadata.file_locator" />
+        </service>
+
+        <service id="tecbot_amf.metadata.annotation_driver" class="Tecbot\AMFBundle\Metadata\Driver\AnnotationDriver" public="false">
+            <argument type="service" id="annotation_reader" />
+        </service>
+
+        <service id="tecbot_amf.metadata.chain_driver" class="Metadata\Driver\DriverChain" public="false">
+            <argument type="collection">
+                <argument type="service" id="tecbot_amf.metadata.yaml_driver" />
+                <argument type="service" id="tecbot_amf.metadata.xml_driver" />
+                <argument type="service" id="tecbot_amf.metadata.php_driver" />
+                <argument type="service" id="tecbot_amf.metadata.annotation_driver" />
+            </argument>
+        </service>
+
+        <service id="tecbot_amf.metadata.lazy_loading_driver" class="Metadata\Driver\LazyLoadingDriver">
+            <argument type="service" id="service_container" />
+            <argument>tecbot_amf.metadata.driver</argument>
+        </service>
+
+        <service id="tecbot_amf.metadata.driver" alias="tecbot_amf.metadata.chain_driver" />
+
+    </services>
+
+</container>

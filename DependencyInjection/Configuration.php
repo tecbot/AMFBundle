@@ -13,6 +13,13 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
+    private $debug;
+
+    public function __construct($debug = false)
+    {
+        $this->debug = $debug;
+    }
+
     /**
      * Generates the configuration tree builder.
      *
@@ -23,11 +30,11 @@ class Configuration implements ConfigurationInterface
         $tb = new TreeBuilder();
         $rootNode = $tb->root('tecbot_amf');
 
-        /*$rootNode
+        $rootNode
+            ->addDefaultsIfNotSet()
             ->children()
-                ->booleanNode('test')->end()
-            ->end()
-        ;*/
+                ->booleanNode('use_serialization')->defaultFalse()->end()
+            ->end();
 
         $this->addServicesSection($rootNode);
         $this->addMappingsSection($rootNode);
@@ -35,9 +42,9 @@ class Configuration implements ConfigurationInterface
         return $tb;
     }
 
-    private function addServicesSection(ArrayNodeDefinition $rootNode)
+    private function addServicesSection(ArrayNodeDefinition $node)
     {
-        $rootNode
+        $node
             ->fixXmlConfig('service')
             ->children()
                 ->arrayNode('services')
@@ -54,9 +61,9 @@ class Configuration implements ConfigurationInterface
         ;
     }
 
-    private function addMappingsSection(ArrayNodeDefinition $rootNode)
+    private function addMappingsSection(ArrayNodeDefinition $node)
     {
-        $rootNode
+        $node
             ->fixXmlConfig('mapping')
             ->children()
                 ->arrayNode('mappings')

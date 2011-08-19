@@ -26,19 +26,25 @@ class TecbotAMFExtension extends Extension
     public function load(array $configs, ContainerBuilder $container)
     {
         $processor = new Processor();
-        $configuration = new Configuration();
+        $configuration = new Configuration($container->getParameter('kernel.debug'));
         $config = $processor->processConfiguration($configuration, $configs);
 
         $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load('amf.xml');
-        $loader->load('controller.xml');
 
+        foreach (array('amf', 'controller') as $name) {
+            $loader->load(sprintf('%s.xml', $name));
+        }
+
+        // services & value objects
         $container->setParameter('tecbot_amf.services', $config['services']);
         $container->setParameter('tecbot_amf.mappings', $config['mappings']);
 
-        /*if (!empty($config['test'])) {
-            $loader->load('test.xml');
-        }*/
+        // serialization
+        if (true === $config['use_serialization']) {
+            foreach (array('metadata', 'serializer') as $name) {
+                $loader->load(sprintf('%s.xml', $name));
+            }
+        }
 
         $this->addClassesToCompile(array(
                 'Tecbot\\AMFBundle\\Amf\\AmfEvents',
