@@ -46,7 +46,11 @@ class ServiceResolver implements ServiceResolverInterface
     {
         $alias = strtolower($bodyRequest->getSource());
         if (!isset($this->services[$alias])) {
-            throw new \InvalidArgumentException(sprintf('Unable to find mapping for Amf service %s.', $alias));
+            if (null !== $this->logger) {
+                $this->logger->warn(sprintf('Unable to find mapping for Amf service %s.', $alias));
+            }
+
+            return false;
         }
 
         $serviceClass = $this->createService($this->services[$alias]);
@@ -54,10 +58,6 @@ class ServiceResolver implements ServiceResolverInterface
 
         if (!method_exists($serviceClass, $method)) {
             throw new \InvalidArgumentException(sprintf('Method "%s::%s" does not exist.', get_class($serviceClass), $method));
-        }
-
-        if (null !== $this->logger) {
-            $this->logger->info(sprintf('Using Amf service "%s::%s"', get_class($serviceClass), $method));
         }
 
         return array($serviceClass, $method);
