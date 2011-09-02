@@ -177,11 +177,6 @@ class Server
         $this->dispatcher->dispatch(AmfEvents::SERVICE, $event);
         $service = $event->getService();
 
-        // service must be a callable
-        if (!is_callable($service)) {
-            throw new \LogicException(sprintf('The Amf service must be a callable (%s).', var_export($service, true)));
-        }
-
         // service arguments
         $arguments = $this->resolver->getArguments($bodyRequest, $service);
 
