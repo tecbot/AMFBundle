@@ -59,6 +59,37 @@ class VOSerializationVisitor extends GenericSerializationVisitor
         }
     }
 
+    public function visitPropertyUsingCustomHandler(PropertyMetadata $metadata, $object)
+    {
+        $data = $metadata->reflection->getValue($object);
+        if (null === $data) {
+            return false;
+        }
+
+        $type = gettype($data);
+        if ('object' === $type) {
+            $type = get_class($data);
+        }
+
+        $visited = false;
+        foreach ($this->propertyCustomHandlers as $handler) {
+            $rs = $handler->serialize($this, $data, $type, $visited);
+            if ($visited) {
+                $k = $this->namingStrategy->translateName($metadata);
+
+                if (is_array($this->data)) {
+                    $this->data[$k] = $rs;
+                } else {
+                    $this->data->{$k} = $rs;
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function startVisitingObject(ClassMetadata $metadata, $data, $type)
     {
         if (null === $this->root) {
