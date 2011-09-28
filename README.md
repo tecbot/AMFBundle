@@ -14,7 +14,7 @@ Checkout a copy of the code::
 
     git submodule add https://github.com/tecbot/AMFBundle.git src/Tecbot/AMFBundle
 
-Then register the bundle with your kernel::
+Then register the bundle with your kernel:
 
     // in AppKernel::registerBundles()
     $bundles = array(
@@ -23,7 +23,7 @@ Then register the bundle with your kernel::
         // ...
     );
 
-Make sure that you also register the namespaces with the autoloader::
+Make sure that you also register the namespaces with the autoloader:
 
     // app/autoload.php
     $loader->registerNamespaces(array(
@@ -37,7 +37,7 @@ Note: The serializer needs the [JMSSerializerBundle][1].
 Configuration
 -------------
 Below is the default configuration, you don't need to change it unless it doesn't
-suit your needs::
+suit your needs:
 
     tecbot_amf:
         use_serialization: false
@@ -46,8 +46,6 @@ Usage
 -----
 
 Configuring services and class mappings
-
-::
 
     tecbot_amf:
         services: # Services
