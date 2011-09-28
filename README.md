@@ -1,76 +1,65 @@
-AMF for Symfony2 (not yet stable)
+========
+Overview
+========
 
-## Installation
+This bundle allows you to use AMF with the Symfony2 Framework.
+Main features include:
 
-  1. Add Tecbot\AMFBundle to your src/ dir
+- handle incoming AMF requests and routing it to the configured services.
+- serializer to convert classes to virtual objects with the [JMSSerializerBundle][1]
 
-          git submodule add git://github.com/tecbot/AMFBundle.git src/Tecbot/AMFBundle
-    
-  2. Add the Tecbot namespace to your autoloader
+Installation
+------------
+Checkout a copy of the code::
 
-          // src/autoload.php
-          $loader->registerNamespaces(array(
-              'Tecbot' => __DIR__,
-              // your other namespaces
-          ));
+    git submodule add https://github.com/tecbot/AMFBundle.git src/Tecbot/AMFBundle
 
-  3. Extends your Kernel from Tecbot\AMFBundle\Amf\Kernel
+Then register the bundle with your kernel::
 
-          // app/AppKernel.php
-          class BeachvilleKernel extends Tecbot\AMFBundle\Amf\Kernel
-          {
-              // ...
-          }
+    // in AppKernel::registerBundles()
+    $bundles = array(
+        // ...
+        new JMS\AMFBundle\TecbotAMFBundle(),
+        // ...
+    );
 
-  4. Add this bundle to your application's kernel:
+Make sure that you also register the namespaces with the autoloader::
 
-          // app/AppKernel.php
-          public function registerBundles()
-          {
-              return array(
-                  // ...
-                  new Tecbot\AMFBundle\TecbotAMFBundle(),
-                  // ...
-              );
-          }
+    // app/autoload.php
+    $loader->registerNamespaces(array(
+        // ...
+        'Tecbot'              => __DIR__.'/../vendor/bundles',
+        // ...
+    ));
 
-  5. Configure the `amf` service in your config:
+Note: The serializer needs the [JMSSerializerBundle][1].
 
-          # app/config/config.yml
-          tecbot_amf:
-              services: # Services
-                  FooService: FooBarBundle:Foo # Map FooService (alias for AMF) to FooBarBundle:Foo class
-              mapping: # class mapping. Actionscript (FooClassVO) to PHP (Foo\BarBundle\VO\FooClassVO)
-                  FooClassVO: Foo\BarBundle\VO\FooClassVO
+Configuration
+-------------
+Below is the default configuration, you don't need to change it unless it doesn't
+suit your needs::
 
-  6. Add this configuration if you want to use the `security component` (currently disabled!):
-          
-          # app/config/config.yml
-          # Create providers in the security config (add SecurityBundle to your application's kernel)
-          security:
-              providers:
-                  foo_provider:
-                      id: foo.bar.provider
+    tecbot_amf:
+        use_serialization: false
 
-          tecbot_amf:
-              services: # Services
-                  FooService: FooBarBundle:Foo # Map FooService (alias for AMF) to FooBarBundle:Foo class
-              mapping: # class mapping. Actionscript (FooClassVO) to PHP (Foo\BarBundle\VO\FooClassVO)
-                  FooClassVO : Foo\BarBundle\VO\FooClassVO
-              security:
-                  provider: foo_provider # reference to the provider name
-                  firewalls:
-                      public:
-                          # Firewall for the method bar in the FooService
-                          service: FooService
-                          method: bar
-                          provider: foo_provider
-                  access_control:
-                      # only users with the role IS_AUTHENTICATED_FULLY has access to the method bar in the FooService
-                      - { service: FooService, method: bar, role: [IS_AUTHENTICATED_FULLY] }
+Usage
+-----
 
-## Use
+Configuring services and class mappings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-See [AMFBundle-sandbox][1]
+::
 
-[1]: https://github.com/tecbot/AMFBundle-sandbox
+    tecbot_amf:
+        services: # Services
+            FooService: FooBarBundle:Foo # Map FooService (Actionscript alias) to FooBarBundle:Foo class
+        mapping: # Class mapping. Map FooClassVO (Actionscript alias) to Foo\BarBundle\VO\FooClassVO
+            FooClassVO: Foo\BarBundle\VO\FooClassVO
+
+Example App
+~~~~~~~~~~~
+
+See [AMFBundle-sandbox][2]
+
+[1]: https://github.com/tecbot/JMSSerializerBundle
+[2]: https://github.com/tecbot/AMFBundle-sandbox
