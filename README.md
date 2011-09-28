@@ -46,7 +46,6 @@ Usage
 -----
 
 Configuring services and class mappings
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -57,7 +56,7 @@ Configuring services and class mappings
             FooClassVO: Foo\BarBundle\VO\FooClassVO
 
 Example App
-~~~~~~~~~~~
+-----------
 
 See [AMFBundle-sandbox][2]
 
