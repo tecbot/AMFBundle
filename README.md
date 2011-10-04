@@ -47,9 +47,12 @@ Usage
 
 Configuring services and class mappings
 
+- All mapped services must be added to the folder "Amf" in your bundle (e.g Foo\BarBundle\Amf\FooService).
+- All public methods wich you want to access from Amf needs the "Action" suffix like controllers.
+
     tecbot_amf:
         services: # Services
-            FooService: FooBarBundle:Foo # Map FooService (Actionscript alias) to FooBarBundle:Foo class
+            FooService: FooBarBundle:Foo # Map FooService (Actionscript alias) to Foo\BarBundle\Amf\Foo class
         mapping: # Class mapping. Map FooClassVO (Actionscript alias) to Foo\BarBundle\VO\FooClassVO
             FooClassVO: Foo\BarBundle\VO\FooClassVO
 
