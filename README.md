@@ -45,10 +45,10 @@ suit your needs:
 Usage
 -----
 
-Configuring services and class mappings
-
 - All mapped services must be added to the folder "Amf" in your bundle (e.g Foo\BarBundle\Amf\FooService).
 - All public methods wich you want to access from Amf needs the "Action" suffix like controllers.
+
+Configuring services and class mappings
 
     tecbot_amf:
         services: # Services
