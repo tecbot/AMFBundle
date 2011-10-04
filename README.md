@@ -53,6 +53,17 @@ Configuring services and class mappings
         mapping: # Class mapping. Map FooClassVO (Actionscript alias) to Foo\BarBundle\VO\FooClassVO
             FooClassVO: Foo\BarBundle\VO\FooClassVO
 
+Add routing to the gateway controller
+
+    # path is "/gateway"
+    _tecbot_amf:
+        resource: "@TecbotAMFBundle/Resources/config/routing.yml"
+
+    # or when you want a another path
+    amf:
+        pattern: /amf
+        defaults: { _controller: tecbot_amf.controller.gateway:gatewayAction }
+
 Example App
 -----------
 
