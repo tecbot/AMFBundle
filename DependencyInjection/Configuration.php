@@ -34,6 +34,7 @@ class Configuration implements ConfigurationInterface
             ->addDefaultsIfNotSet()
             ->children()
                 ->booleanNode('use_serialization')->defaultFalse()->end()
+                ->booleanNode('logging')->defaultFalse()->end()
             ->end();
 
         $this->addServicesSection($rootNode);

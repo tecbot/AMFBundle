@@ -27,6 +27,7 @@ class Server
     private $container;
     private $resolver;
     private $debug;
+    private $log = array();
 
     /**
      * Constructor
@@ -78,7 +79,17 @@ class Server
         }
 
         // Return the Amf serialized Response
-        return new Response($response);
+        return new Response($response->finalize());
+    }
+
+    /**
+     * Adds a log message.
+     *
+     * @param string $message
+     */
+    public function addLogMessage($message)
+    {
+        $this->log[] = $message;
     }
 
     protected function handleRaw(StreamRequest $request)
@@ -142,12 +153,17 @@ class Server
                 $responseType = Constants::STATUS_METHOD;
             }
 
+            if ($return instanceof AcknowledgeMessage) {
+                $return->headers->log = $this->log;
+            }
+            $this->log = array();
+
             $responseURI = $body->getResponseURI() . $responseType;
             $newBody = new MessageBody($responseURI, null, $return);
             $response->addAmfBody($newBody);
         }
 
-        return $response->finalize();
+        return $response;
     }
 
     /**

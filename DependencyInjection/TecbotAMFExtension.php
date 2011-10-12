@@ -46,22 +46,28 @@ class TecbotAMFExtension extends Extension
             }
         }
 
+        // logging
+        if(true === $config['logging']) {
+            $loader->load('logger.xml');
+        }
+
         $this->addClassesToCompile(array(
+                'Tecbot\\AMFBundle\\Amf\\Service\\ServiceNameParser',
+                'Tecbot\\AMFBundle\\Amf\\Service\\ServiceResolver',
+                'Tecbot\\AMFBundle\\Amf\\Service\\ServiceResolverInterface',
                 'Tecbot\\AMFBundle\\Amf\\AmfEvents',
                 'Tecbot\\AMFBundle\\Amf\\BodyRequest',
                 'Tecbot\\AMFBundle\\Amf\\Server',
 
                 'Tecbot\\AMFBundle\\Controller\\GatewayController',
 
-                'Tecbot\\AMFBundle\\Amf\\Service\\ServiceNameParser',
-                'Tecbot\\AMFBundle\\Amf\\Service\\ServiceResolver',
-                'Tecbot\\AMFBundle\\Amf\\Service\\ServiceResolverInterface',
-
                 'Tecbot\\AMFBundle\\Event\\FilterBodyResponseEvent',
                 'Tecbot\\AMFBundle\\Event\\FilterServiceEvent',
                 'Tecbot\\AMFBundle\\Event\\GetBodyResponseEvent',
 
                 'Tecbot\\AMFBundle\\HttpFoundation\\Response',
+
+                'Tecbot\\AMFBundle\\Logger\\Handler\\AmfHandler',
             ));
     }
 }
