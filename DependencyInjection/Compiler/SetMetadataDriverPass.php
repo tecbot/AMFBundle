@@ -19,43 +19,22 @@ class SetMetadataDriverPass implements CompilerPassInterface
                 ->replaceArgument(0, new Reference('tecbot_amf.metadata.lazy_loading_driver'));
 
         // Custom Handlers
-        $serializationHandlers = array();
-        foreach ($container->findTaggedServiceIds('jms_serializer.serialization_handler') as $id => $attributes) {
-            $serializationHandlers[] = new Reference($id);
-        }
-
-        $deserializationHandlers = array();
-        foreach ($container->findTaggedServiceIds('jms_serializer.deserialization_handlers') as $id => $attributes) {
-            $deserializationHandlers[] = new Reference($id);
-        }
+        $serializationHandlers = $container
+                ->getDefinition('jms_serializer.json_serialization_visitor')
+                ->getArgument(1);
 
         $container
-            ->getDefinition('tecbot_amf.serialization.visitor.vo')
-            ->replaceArgument(1, $serializationHandlers)
-        ;
-        $container
-            ->getDefinition('tecbot_amf.serialization.visitor.vo')
-            ->replaceArgument(1, $serializationHandlers)
-        ;
+                ->getDefinition('tecbot_amf.serialization.visitor.vo')
+                ->replaceArgument(1, $serializationHandlers);
 
         // Property Custom Handlers
-        $serializationHandlers = array();
+        $propertySerializationHandlers = array();
         foreach ($container->findTaggedServiceIds('jms_serializer.property_serialization_handler') as $id => $attributes) {
-            $serializationHandlers[] = new Reference($id);
-        }
-
-        $deserializationHandlers = array();
-        foreach ($container->findTaggedServiceIds('jms_serializer.property_deserialization_handlers') as $id => $attributes) {
-            $deserializationHandlers[] = new Reference($id);
+            $propertySerializationHandlers[] = new Reference($id);
         }
 
         $container
-            ->getDefinition('tecbot_amf.serialization.visitor.vo')
-            ->replaceArgument(2, $serializationHandlers)
-        ;
-        $container
-            ->getDefinition('tecbot_amf.serialization.visitor.vo')
-            ->replaceArgument(2, $serializationHandlers)
-        ;
+                ->getDefinition('tecbot_amf.serialization.visitor.vo')
+                ->replaceArgument(2, $propertySerializationHandlers);
     }
 }
