@@ -21,4 +21,8 @@ final class AmfEvents
      * @var string
      */
     const BODY_RESPONSE = 'tecbot_amf.body_response';
+    /**
+     * @var string
+     */
+    const BODY_EXCEPTION = 'tecbot_amf.body_exception';
 }

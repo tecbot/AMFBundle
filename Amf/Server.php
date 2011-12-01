@@ -10,6 +10,7 @@ use Tecbot\AMFBundle\Amf\Service\ServiceResolverInterface;
 use Tecbot\AMFBundle\Event\FilterBodyResponseEvent;
 use Tecbot\AMFBundle\Event\FilterServiceEvent;
 use Tecbot\AMFBundle\Event\GetBodyResponseEvent;
+use Tecbot\AMFBundle\Event\GetBodyResponseForExceptionEvent;
 use Tecbot\AMFBundle\HttpFoundation\Response;
 use Zend\Amf\Constants;
 use Zend\Amf\Parser\TypeLoader;
@@ -106,6 +107,7 @@ class Server
         // Iterate through each of the service calls in the AMF request
         $bodies = $request->getAmfBodies();
         foreach ($bodies as $body) {
+            /* @var $body \Zend\Amf\Value\MessageBody */
             try {
                 if (Constants::AMF0_OBJECT_ENCODING === $objectEncoding) {
                     // AMF0 Object Encoding
@@ -149,8 +151,13 @@ class Server
                 }
                 $responseType = Constants::RESULT_METHOD;
             } catch (\Exception $e) {
-                $return = $this->errorMessage($objectEncoding, $message, $e->getMessage(), $e->getTraceAsString(), $e->getCode(), $e->getLine());
-                $responseType = Constants::STATUS_METHOD;
+                try {
+                    $return = $this->handleException($e, $body);
+                    $responseType = Constants::RESULT_METHOD;
+                } catch (\Exception $e) {
+                    $return = $this->errorMessage($objectEncoding, $message, $e->getMessage(), $e->getTraceAsString(), $e->getCode(), $e->getLine());
+                    $responseType = Constants::STATUS_METHOD;
+                }
             }
 
             if ($return instanceof AcknowledgeMessage) {
@@ -233,6 +240,26 @@ class Server
         }
 
         return $return;
+    }
+
+    /**
+     * Handles and exception by trying to convert it to a Response.
+     *
+     * @param  \Exception  $e    An Exception instance
+     * @param  MessageBody $body A MessageBody instance
+     *
+     * @return mixed
+     */
+    protected function handleException(\Exception $e, MessageBody $body)
+    {
+        $event = new GetBodyResponseForExceptionEvent($body, $e);
+        $this->dispatcher->dispatch(AmfEvents::BODY_EXCEPTION, $event);
+
+        if (!$event->hasBodyResponse()) {
+            throw $e;
+        }
+
+        return $event->getBodyResponse();
     }
 
     /**
