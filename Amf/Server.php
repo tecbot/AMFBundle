@@ -107,6 +107,7 @@ class Server
         // Iterate through each of the service calls in the AMF request
         $bodies = $request->getAmfBodies();
         foreach ($bodies as $body) {
+            $message = null;
             /* @var $body \Zend\Amf\Value\MessageBody */
             try {
                 if (Constants::AMF0_OBJECT_ENCODING === $objectEncoding) {
@@ -154,6 +155,13 @@ class Server
                 try {
                     $return = $this->handleException($e, $body);
                     $responseType = Constants::RESULT_METHOD;
+
+                    if (Constants::AMF3_OBJECT_ENCODING === $objectEncoding) {
+                        $newMessage = new AcknowledgeMessage($message);
+                        $newMessage->body = $return;
+
+                        $return = $newMessage;
+                    }
                 } catch (\Exception $e) {
                     $return = $this->errorMessage($objectEncoding, $message, $e->getMessage(), $e->getTraceAsString(), $e->getCode(), $e->getLine());
                     $responseType = Constants::STATUS_METHOD;
