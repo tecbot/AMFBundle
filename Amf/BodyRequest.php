@@ -15,7 +15,7 @@ class BodyRequest
 
     /**
      * Constructor.
-     * 
+     *
      * @param string $method
      * @param array  $arguments
      * @param string $source
