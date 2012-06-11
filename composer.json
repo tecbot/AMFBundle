@@ -1,0 +1,22 @@
+{
+    "name":         "tecbot/amf-bundle",
+    "description":  "Tecbot AMFBundle",
+    "keywords":     ["amf"],
+    "type":         "symfony-bundle",
+    "authors": [
+        {
+            "name":     "Thomas Adam",
+            "email":    "thomas.adam@tebot.de"
+        }
+    ],
+    "require": {
+        "symfony/framework-bundle": "2.0.*",
+        "zendframework/zendframework": "2.0.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Tecbot\\AMFBundle": ""
+        }
+    },
+    "target-dir": "Tecbot/AMFBundle"
+}
